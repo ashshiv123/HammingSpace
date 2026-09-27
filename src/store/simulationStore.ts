@@ -22,6 +22,7 @@ export type SimulationStage =
 
 export type CameraFocusTarget =
   | 'overview'
+  | 'display'
   | 'firstPerson'
   | 'tx'
   | 'msgInput'
@@ -316,6 +317,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       isAnimationPlaying: true,
       stage: 'encoding',
       showLiveHUD: false,
+      cameraFocus: 'display',
     });
   },
 

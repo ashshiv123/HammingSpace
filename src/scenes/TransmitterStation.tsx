@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Text } from '@react-three/drei';
 import { a, useSpring } from '@react-spring/three';
 import * as THREE from 'three';
 import { useSimulationStore } from '../store/simulationStore';
-import { MatrixGrid } from '../components3d/MatrixGrid';
 import { LaptopStation3D } from '../components3d/LaptopStation3D';
 
 export interface TransmitterStationProps {
@@ -101,7 +100,6 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
   const {
     k,
     n,
-    G,
     message,
     toggleMessageBit,
     encode,
@@ -109,36 +107,12 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
     stage,
     calculationSteps,
     currentStepIndex,
-    cameraFocus,
     showLiveHUD,
   } = useSimulationStore();
   const [encodeHovered, setEncodeHovered] = useState(false);
 
   const currentStep = calculationSteps[currentStepIndex];
   const isEncodingCalc = stage === 'encoding' && !!currentStep;
-
-  // Active rows based on message bit state
-  const activeRows = useMemo(() => {
-    const rows: number[] = [];
-    message.forEach((bit, idx) => {
-      if (bit === 1) rows.push(idx);
-    });
-    return rows;
-  }, [message]);
-
-  const extractedRows = useMemo(() => {
-    if (isEncodingCalc && currentStep?.highlightRows) {
-      return currentStep.highlightRows;
-    }
-    return activeRows;
-  }, [isEncodingCalc, currentStep?.highlightRows, activeRows]);
-
-  const matrixHighlightRows = extractedRows;
-  const matrixHighlightCols = isEncodingCalc ? currentStep?.highlightCols ?? [] : [];
-  const matrixHighlightCells = isEncodingCalc ? currentStep?.activeCells ?? [] : [];
-
-  const isStationDimmed =
-    cameraFocus === 'rx' || cameraFocus === 'syndrome' || cameraFocus === 'channel';
 
   // Generic dynamic sizing for message keys on laptop keyboard
   const keySpacing = Math.min(0.42, Math.max(0.24, 2.8 / k));
@@ -226,20 +200,62 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
           </group>
         }
       >
-        {/* On Laptop Retina Screen: Generator Matrix G Display */}
+        {/* Laptop screen shows the live outgoing message selected on the keyboard. */}
         <group position={[0, -0.05, 0]}>
-          <MatrixGrid
-            data={G}
-            label=""
-            sublabel=""
-            highlightIndices={{
-              rows: matrixHighlightRows,
-              cols: matrixHighlightCols,
-              cells: matrixHighlightCells,
-              extractedRows,
-            }}
-            isDimmed={isStationDimmed}
-          />
+          <Text
+            position={[0, 0.48, 0.02]}
+            fontSize={0.12}
+            color="#93c5fd"
+            anchorX="center"
+            anchorY="middle"
+            letterSpacing={0.06}
+          >
+            OUTGOING MESSAGE m
+          </Text>
+          {message.map((bit, idx) => {
+            const spacing = Math.min(0.27, 3.0 / k);
+            const x = ((k - 1) * -spacing) / 2 + idx * spacing;
+            return (
+              <group key={`screen-message-bit-${idx}`} position={[x, 0.04, 0.02]}>
+                <mesh>
+                  <planeGeometry args={[spacing * 0.82, 0.32]} />
+                  <meshStandardMaterial
+                    color={bit ? '#164e63' : '#111827'}
+                    emissive={bit ? '#0891b2' : '#000000'}
+                    emissiveIntensity={bit ? 0.4 : 0}
+                    roughness={0.35}
+                  />
+                </mesh>
+                <Text
+                  position={[0, 0, 0.01]}
+                  fontSize={0.18}
+                  color={bit ? '#ecfeff' : '#94a3b8'}
+                  anchorX="center"
+                  anchorY="middle"
+                >
+                  {String(bit)}
+                </Text>
+                <Text
+                  position={[0, -0.25, 0.01]}
+                  fontSize={0.07}
+                  color="#64748b"
+                  anchorX="center"
+                  anchorY="middle"
+                >
+                  {`m${idx}`}
+                </Text>
+              </group>
+            );
+          })}
+          <Text
+            position={[0, -0.55, 0.02]}
+            fontSize={0.085}
+            color={stage === 'encoding' ? '#34d399' : '#94a3b8'}
+            anchorX="center"
+            anchorY="middle"
+          >
+            {stage === 'encoding' ? 'MESSAGE SENT — ENCODING STARTED' : 'TOGGLE MESSAGE BITS, THEN SEND'}
+          </Text>
         </group>
       </LaptopStation3D>
     </group>

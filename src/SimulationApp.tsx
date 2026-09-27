@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   Zap,
   Calculator,
-  Sparkles,
 } from 'lucide-react';
 import { useSimulationStore } from './store/simulationStore';
 import { LabScene } from './scenes/LabScene';
@@ -17,7 +16,6 @@ import { SessionLogPanel } from './scenes/SessionLogPanel';
 import { StageInstruction } from './components2d/StageInstruction';
 import { useCalculationPlayback } from './hooks/useCalculationPlayback';
 import { CalculationPage } from './pages/CalculationPage';
-import { CalculationVisualizerDrawer } from './components2d/CalculationVisualizerDrawer';
 import { GameControllerHUD } from './components2d/GameControllerHUD';
 import { FirstPersonReticle } from './components2d/FirstPersonReticle';
 import { Footprints } from 'lucide-react';
@@ -25,8 +23,6 @@ import { Footprints } from 'lucide-react';
 export default function App() {
   const { stage, cameraFocus, setCameraFocus } = useSimulationStore();
   useCalculationPlayback();
-
-  const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
 
   // Client-side route management: '/' for 3D Lab, '/calculation' for 2D visualizer
   const [currentView, setCurrentView] = useState<'3d' | 'calculation'>(() => {
@@ -179,25 +175,12 @@ export default function App() {
             </button>
             <button
               type="button"
-              onClick={() => setIsVisualizerOpen(!isVisualizerOpen)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition cursor-pointer ${
-                isVisualizerOpen
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'text-amber-300 bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/50'
-              }`}
-              title="Toggle Interactive Calculation Visualizer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>How Calculations Work</span>
-            </button>
-            <button
-              type="button"
               onClick={() => navigateTo('calculation')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition cursor-pointer text-slate-400 hover:text-slate-100 hover:bg-slate-800"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition cursor-pointer text-blue-300 border border-blue-500/40 bg-blue-950/40 hover:bg-blue-900/60"
               title="Open 2D Mathematical Matrix Visualizer (/calculation)"
             >
               <Calculator className="w-3.5 h-3.5 text-blue-400" />
-              <span className="hidden sm:inline">2D Math Visualizer</span>
+              <span>2D Math Visualizer</span>
             </button>
           </div>
 
@@ -235,15 +218,8 @@ export default function App() {
           >
             <ControlPanel
               onOpenCalculationVisualizer={() => navigateTo('calculation')}
-              onOpenVisualizerDrawer={() => setIsVisualizerOpen(true)}
             />
           </aside>
-
-          {/* Interactive Calculation Visualizer Drawer (z-50) */}
-          <CalculationVisualizerDrawer
-            isOpen={isVisualizerOpen}
-            onClose={() => setIsVisualizerOpen(false)}
-          />
 
           {/* ===================================================================== */}
           {/* UNIQUE CONTAINER 3: STAGE INSTRUCTION (z-30)                          */}

@@ -7,7 +7,7 @@
  *
  * Nothing downstream may hardcode 7, 4, 3 or any matrix: the guided derivation
  * sequence (D1–D5), the Control Station, the transmission encoder and the
- * "How Calculations Work" panels all consume deriveHammingParams(k).
+ * The derivation and calculation views all consume deriveHammingParams(k).
  *
  * Pure functions, no React, no side effects.
  */

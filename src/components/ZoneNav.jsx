@@ -15,7 +15,7 @@ const ZONES = [
 
 const SIDE_ZONE = { id: 'hamming', label: '◈ Hamming Space', color: '#7c4dff' };
 
-export default function ZoneNav({ activeZone, onNavigate, onToggleVisualizer, isVisualizerOpen }) {
+export default function ZoneNav({ activeZone, onNavigate }) {
   return (
     <div style={styles.container}>
       <button
@@ -58,25 +58,6 @@ export default function ZoneNav({ activeZone, onNavigate, onToggleVisualizer, is
       >
         {SIDE_ZONE.label}
       </button>
-
-      {onToggleVisualizer && (
-        <>
-          <div style={styles.separator}>│</div>
-          <button
-            onClick={onToggleVisualizer}
-            style={{
-              ...styles.btn,
-              borderColor: isVisualizerOpen ? '#f59e0b' : '#3b82f6',
-              background: isVisualizerOpen ? 'rgba(245, 158, 11, 0.25)' : 'rgba(59, 130, 246, 0.15)',
-              color: isVisualizerOpen ? '#fbbf24' : '#93c5fd',
-              fontWeight: 700,
-            }}
-            title="Open Interactive GF(2) Matrix Calculation Visualizer"
-          >
-            ✨ How Calculations Work
-          </button>
-        </>
-      )}
     </div>
   );
 }

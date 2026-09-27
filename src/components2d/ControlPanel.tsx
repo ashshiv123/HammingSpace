@@ -20,12 +20,10 @@ import { useSimulationStore } from '../store/simulationStore';
 
 export interface ControlPanelProps {
   onOpenCalculationVisualizer?: () => void;
-  onOpenVisualizerDrawer?: () => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
   onOpenCalculationVisualizer,
-  onOpenVisualizerDrawer,
 }) => {
   const {
     n,
@@ -356,7 +354,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 type="button"
                 onClick={() => {
                   startExplainEncoding();
-                  onOpenVisualizerDrawer?.();
                 }}
                 className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-mono font-medium uppercase transition bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer"
               >
@@ -603,19 +600,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
         </div>
 
-        {/* Visualizer Trigger & Reset */}
+        {/* Simulation Reset */}
         <div className="border-t border-slate-800 pt-2 space-y-1.5">
-          {onOpenVisualizerDrawer && (
-            <button
-              type="button"
-              onClick={onOpenVisualizerDrawer}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/60 text-amber-300 rounded-lg text-[11px] font-mono font-semibold transition cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>How Calculations Work</span>
-            </button>
-          )}
-
           <button
             type="button"
             onClick={reset}

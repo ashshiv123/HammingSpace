@@ -25,6 +25,12 @@ export const BackWallDisplayBoard3D: React.FC = () => {
   const r = n - k;
   const currentStep = calculationSteps[currentStepIndex];
   const isEncoding = stage === 'encoding';
+  const isDerivationStep = isEncoding && (
+    currentStep?.timelineStage === 'derive_parity_count' ||
+    currentStep?.timelineStage === 'label_positions' ||
+    currentStep?.timelineStage === 'build_parity_matrix' ||
+    currentStep?.timelineStage === 'build_generator_matrix'
+  );
   const isDecoding = stage === 'decoding';
   const isErrorDetected = stage === 'errorDetected';
   const isCorrected = stage === 'corrected';
@@ -125,7 +131,9 @@ export const BackWallDisplayBoard3D: React.FC = () => {
     }
   });
 
-  const headerStatus = isEncoding
+  const headerStatus = isEncoding && currentStep
+    ? `STEP ${currentStep.stepIndex + 1} / ${currentStep.totalSteps}`
+    : isEncoding
     ? 'ENCODING IN PROGRESS'
     : isDecoding
     ? 'PARITY VERIFICATION IN PROGRESS'
@@ -267,7 +275,7 @@ export const BackWallDisplayBoard3D: React.FC = () => {
           letterSpacing={0.05}
         >
           {isEncoding
-            ? '1. MATRIX MULTIPLICATION'
+            ? currentStep?.title ?? 'ENCODING MESSAGE'
             : isDecoding
             ? '1. PARITY CHECK EQUATION'
             : '1. CODE SPECIFICATION'}
@@ -276,13 +284,17 @@ export const BackWallDisplayBoard3D: React.FC = () => {
         {/* Primary Formula Display */}
         <Text
           position={[-1.7, 1.05, 0.02]}
-          fontSize={0.28}
+          fontSize={isDerivationStep ? 0.18 : 0.28}
           color="#f8fafc"
           anchorX="left"
           anchorY="middle"
+          maxWidth={3.4}
+          lineHeight={1.15}
         >
           {isEncoding
-            ? 'c = m · G (mod 2)'
+            ? isDerivationStep
+              ? currentStep?.mathFormula ?? 'Derive the selected code layout'
+              : 'c = m · G (mod 2)'
             : isDecoding
             ? 'S = r · Hᵀ (mod 2)'
             : 'G · Hᵀ = 0 (mod 2)'}
@@ -291,13 +303,15 @@ export const BackWallDisplayBoard3D: React.FC = () => {
         {/* Formula Subtitle & Active Element */}
         <Text
           position={[-1.7, 0.65, 0.02]}
-          fontSize={0.16}
+          fontSize={isEncoding ? 0.13 : 0.16}
           color="#60a5fa"
           anchorX="left"
           anchorY="middle"
+          maxWidth={3.4}
+          lineHeight={1.2}
         >
           {isEncoding
-            ? `Evaluating Column c${activeCol} of ${n}`
+            ? currentStep?.subtitle ?? `Evaluating Column c${activeCol} of ${n}`
             : isDecoding
             ? `Evaluating Syndrome Bit s${activeRow} of ${r}`
             : `Systematic Form: G = [I${k} | P]`}
@@ -312,7 +326,9 @@ export const BackWallDisplayBoard3D: React.FC = () => {
           anchorY="middle"
         >
           {isEncoding
-            ? `Message m = [${message.join(' ')}]`
+            ? isDerivationStep
+              ? 'First derive the code layout; the real message is used in Step 5.'
+              : `Message m = [${message.join(' ')}]`
             : isDecoding
             ? `Received r = [${receivedVector.join(' ')}]`
             : `Parity Form: H = [Pᵀ | I${r}]`}
@@ -320,13 +336,13 @@ export const BackWallDisplayBoard3D: React.FC = () => {
 
         {/* Expanded linear sum row selection */}
         <Text
-          position={[-1.7, -0.25, 0.02]}
-          fontSize={0.13}
+          position={[-1.7, isDerivationStep ? 0.02 : -0.25, 0.02]}
+          fontSize={isDerivationStep ? 0.095 : 0.13}
           color="#e2e8f0"
           anchorX="left"
           anchorY="top"
           maxWidth={3.4}
-          lineHeight={1.4}
+          lineHeight={isDerivationStep ? 1.1 : 1.4}
         >
           {isEncoding
             ? currentStep?.expandedTerms ||
@@ -338,7 +354,7 @@ export const BackWallDisplayBoard3D: React.FC = () => {
         </Text>
 
         {/* Result readout banner */}
-        <group position={[0, -1.2, 0.02]}>
+        <group position={[0, -1.2, 0.02]} visible={!isDerivationStep}>
           <mesh position={[0, 0, 0]}>
             <planeGeometry args={[3.4, 0.48]} />
             <meshStandardMaterial color="#0f172a" />
@@ -512,26 +528,31 @@ export const BackWallDisplayBoard3D: React.FC = () => {
           <meshBasicMaterial color="#334155" />
         </mesh>
 
-        {/* XOR Truth Table Display below */}
+        {/* Live explanation for the current encoding step */}
         <group position={[0, -1.1, 0.02]}>
           <Text
-            position={[0, 0.2, 0]}
-            fontSize={0.10}
-            color="#64748b"
+            position={[0, 0.27, 0]}
+            fontSize={0.09}
+            color="#60a5fa"
             anchorX="center"
             anchorY="middle"
             letterSpacing={0.06}
           >
-            GALOIS FIELD GF(2) TRUTH TABLE
+            {isEncoding ? 'WHY THIS STEP WORKS' : 'GALOIS FIELD GF(2) TRUTH TABLE'}
           </Text>
           <Text
-            position={[0, -0.08, 0]}
-            fontSize={0.11}
+            position={[0, -0.12, 0]}
+            fontSize={isEncoding ? 0.095 : 0.11}
             color="#94a3b8"
             anchorX="center"
-            anchorY="middle"
+            anchorY={isEncoding ? 'top' : 'middle'}
+            maxWidth={3.8}
+            lineHeight={1.25}
+            textAlign="center"
           >
-            0 ⊕ 0 = 0  ·  0 ⊕ 1 = 1  ·  1 ⊕ 0 = 1  ·  1 ⊕ 1 = 0
+            {isEncoding
+              ? currentStep?.explanation ?? 'Select the rows where the message bit is 1, then combine them over GF(2).'
+              : '0 ⊕ 0 = 0  ·  0 ⊕ 1 = 1  ·  1 ⊕ 0 = 1  ·  1 ⊕ 1 = 0'}
           </Text>
         </group>
       </group>
@@ -587,7 +608,9 @@ export const BackWallDisplayBoard3D: React.FC = () => {
             const spacing = Math.min(0.24, 3.2 / n);
             const startX = -((Math.min(n, 15) - 1) * spacing) / 2;
             const x = startX + bIdx * spacing;
-            const bitVal = codeword[bIdx] ?? 0;
+            const bitVal = isEncoding
+              ? currentStep?.computedCodewordBits[bIdx] ?? null
+              : codeword[bIdx] ?? 0;
             const isActive = isEncoding && activeCol === bIdx;
             const isCorrupted = errorPositions.includes(bIdx);
 
@@ -601,9 +624,11 @@ export const BackWallDisplayBoard3D: React.FC = () => {
                         ? '#f43f5e'
                         : isActive
                         ? '#3b82f6'
-                        : bitVal === 1
+                      : bitVal === 1
                         ? '#f8fafc'
-                        : '#1e293b'
+                      : bitVal === 0
+                      ? '#1e293b'
+                      : '#0f172a'
                     }
                     emissive={
                       isCorrupted
@@ -621,14 +646,14 @@ export const BackWallDisplayBoard3D: React.FC = () => {
                   color={
                     isCorrupted || isActive
                       ? '#ffffff'
-                      : bitVal === 1
+                    : bitVal === 1
                       ? '#0f172a'
                       : '#64748b'
                   }
                   anchorX="center"
                   anchorY="middle"
                 >
-                  {bitVal.toString()}
+                  {bitVal === null ? '·' : bitVal.toString()}
                 </Text>
                 <Text
                   position={[0, -spacing * 0.62, 0.01]}

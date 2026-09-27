@@ -33,9 +33,8 @@ A browser-based 3D digital communication lab (React + Three.js) with:
    - **Custom (n,k) Editor**: A realtime editor allowing the user to resize $n$ and $k$, input a custom Parity matrix, validate it, and instantly reshape the entire 3D lab environment (switches, $G$ rows, $H$ columns, and 3D constellation).
 6. **Educational Theory Landing Page**:
    - Comprehensive interactive documentation explaining the geometry and algebra of Hamming codes with animated visual diagrams.
-7. **Nine-step Calculation Lesson**:
-   - A narrated derivation on `/calculation` covering parity-bit count, position roles, P, G, encoding, channel errors, correction capacity, H, and syndrome decoding.
-   - Explanations use the selected code, live message, matrices, received vector, and minimum distance from the calculation workspace.
+7. **Automatic Encoding Walkthrough**:
+   - The transmitter laptop shows the live outgoing message. Sending it automatically moves the camera to the studio display, where the encoding playback presents the active step, formula, GF(2) working, explanation, and progressively assembled codeword.
 
 ### Core Features
 
@@ -51,7 +50,7 @@ A browser-based 3D digital communication lab (React + Three.js) with:
 - **Custom (n,k) Editor** — reshape the entire 3D lab by inputting custom code parameters
 - **GF(2) Math Engine** — pure modular implementation of encode, syndrome, and table correction
 - **Educational Theory Landing Page** — scrollspy navigation, side-by-side SVG diagrams for mathematical concepts, and an animated glassmorphic background
-- **Nine-step Calculation Lesson** — full-length teaching narrative with progress, comprehension prompts, previous/continue/restart controls, and live values alongside the existing matrix visualizer
+- **Automatic Encoding Walkthrough** — sends the live message from the transmitter to a step-by-step explanation on the back-wall display, with automatic camera focus and playback driven by the existing GF(2) calculation steps
 
 ### Technical Architecture
 
@@ -62,7 +61,8 @@ Single-page React 18 + Vite 5 application.
 - **HammingSpaceChamber (`src/components/HammingSpaceChamber.jsx`)**: Projects $n$-bit vectors onto 3D basis coordinates to draw the $d_{min}$ landscape.
 - **Mode & Custom UI (`src/components/ModeSelector.jsx`, `CustomLabHUD.jsx`)**: HTML DOM overlays seamlessly overlaid on the WebGL context.
 - **Scene Root (`src/components/Lab3D.jsx`)**: React Three Fiber Canvas with directional and ambient lighting, starfield, unified ground plane, and CameraController.
-- **Calculation Route (`src/pages/CalculationPage.tsx`, `CalculationNarrative.tsx`)**: Existing encoding and syndrome workspaces remain in place, with a state-driven nine-stage teaching narrative above them. Channel errors reuse the syndrome workspace bit toggles.
+- **Calculation Route (`src/pages/CalculationPage.tsx`)**: Dedicated 2D matrix workspace with encoding and syndrome modes, Hamming preset selection, live matrix calculations, and playback controls.
+- **Encoding Display (`src/components3d/BackWallDisplayBoard3D.tsx`)**: Reads the active calculation step from the shared simulation store; the camera focuses on it when encoding starts. The transmitter laptop displays the outgoing message vector.
 
 ### Tech Stack
 
@@ -100,14 +100,10 @@ npm run build     # production build
 6. Click **"RUN DIAGNOSTICS"** then **"APPLY CORRECTION"**.
 7. Change the **Lab Mode** to **Custom Code Lab**. A UI panel appears top-left.
 8. Set $n=6, k=3$. Notice the 3D lab instantly drops a switch in the console and removes a row in the $G$ matrix!
+9. Toggle the transmitter message bits and click **SEND**. The laptop screen shows the outgoing vector, the camera moves to the back-wall display, and the explanation walks through row selection, column XOR, and codeword assembly automatically.
 
-**Trying the Calculation Lesson**:
-1. Open `http://localhost:5173/calculation` and use the nine-step lesson controls to move through the derivation.
-2. Toggle message bits in the Encoding workspace; the narrative's message, codeword, and parity values update from the same calculation state.
-3. On the channel stage, open the existing Syndrome workspace and click received bits to inject errors; the error vector, correction-capacity explanation, and decoding result update from that state.
-4. Change the Hamming code selector to compare the lesson against the selected code's matrices and minimum distance.
-9. Open the Zone Nav (bottom center) and click **Hamming Space**.
-10. Explore the 3D constellation. Notice how $r$ is connected to its origin codeword $c$ by a red dashed line, and to the `corrected` codeword by a solid line.
+10. Open the Zone Nav (bottom center) and click **Hamming Space**.
+11. Explore the 3D constellation. Notice how $r$ is connected to its origin codeword $c$ by a red dashed line, and to the `corrected` codeword by a solid line.
 
 ### Known Limitations
 
