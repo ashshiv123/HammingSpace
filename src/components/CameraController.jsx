@@ -1,8 +1,11 @@
 /**
- * CameraController.jsx — Smooth camera transitions between zones
+ * CameraController.jsx — Smooth camera transitions and WASD flight controller
  *
- * Uses useFrame to lerp camera position/target toward the active zone.
- * Hamming Space transitions feel like "stepping aside" (Z-axis movement).
+ * Combines HammingSpace's zone lerping with project_simulation's WASD flight controls.
+ * - Zone presets: overview, transmitter, channel, receiver, hamming
+ * - Real-time WASD / Arrow keys navigation with sprint (Shift)
+ * - Elevation keys: Space/E (up), Q/C (down)
+ * - Listens for synthetic events dispatched by GameControllerHUD
  */
 
 import { useRef, useEffect } from 'react';
@@ -40,7 +43,9 @@ export default function CameraController({ activeZone = 'overview', orbitRef }) 
   const targetLook = useRef(new THREE.Vector3());
   const isTransitioning = useRef(false);
   const lastZone = useRef(activeZone);
+  const keysDown = useRef({});
 
+  // Zone transition trigger
   useEffect(() => {
     if (activeZone !== lastZone.current) {
       isTransitioning.current = true;
@@ -51,25 +56,98 @@ export default function CameraController({ activeZone = 'overview', orbitRef }) 
     targetLook.current.copy(config.target);
   }, [activeZone]);
 
+  // Keyboard navigation listeners (WASD / Arrows / Space / Q)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const target = e.target;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      keysDown.current[e.code] = true;
+    };
+
+    const handleKeyUp = (e) => {
+      keysDown.current[e.code] = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
   useFrame((_, delta) => {
-    if (!isTransitioning.current) return;
+    const isW = keysDown.current['KeyW'] || keysDown.current['ArrowUp'];
+    const isS = keysDown.current['KeyS'] || keysDown.current['ArrowDown'];
+    const isA = keysDown.current['KeyA'] || keysDown.current['ArrowLeft'];
+    const isD = keysDown.current['KeyD'] || keysDown.current['ArrowRight'];
+    const isUp = keysDown.current['KeyE'] || keysDown.current['Space'];
+    const isDown = keysDown.current['KeyQ'] || keysDown.current['KeyC'];
+    const isSprint = keysDown.current['ShiftLeft'] || keysDown.current['ShiftRight'];
 
-    const speed = LERP_SPEED * delta;
-    camera.position.lerp(targetPos.current, speed);
+    // 1. Interactive WASD free movement
+    if (isW || isS || isA || isD || isUp || isDown) {
+      isTransitioning.current = false;
 
-    if (orbitRef?.current) {
-      orbitRef.current.target.lerp(targetLook.current, speed);
-      orbitRef.current.update();
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.normalize();
+
+      const right = new THREE.Vector3();
+      right.crossVectors(forward, camera.up).normalize();
+
+      const moveDir = new THREE.Vector3(0, 0, 0);
+      if (isW) moveDir.add(forward);
+      if (isS) moveDir.sub(forward);
+      if (isD) moveDir.add(right);
+      if (isA) moveDir.sub(right);
+      if (isUp) moveDir.y += 0.8;
+      if (isDown) moveDir.y -= 0.8;
+
+      if (moveDir.lengthSq() > 0) {
+        moveDir.normalize();
+        const baseSpeed = isSprint ? 18.0 : 8.5;
+        const moveDelta = moveDir.multiplyScalar(baseSpeed * delta);
+
+        camera.position.add(moveDelta);
+        if (orbitRef?.current) {
+          orbitRef.current.target.add(moveDelta);
+          orbitRef.current.update();
+        }
+
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -24, 24);
+        camera.position.y = THREE.MathUtils.clamp(camera.position.y, 0.4, 20);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -22, 28);
+      }
+      return;
     }
 
-    const posDist = camera.position.distanceTo(targetPos.current);
-    if (posDist < 0.05) {
-      camera.position.copy(targetPos.current);
+    // 2. Zone smooth interpolation
+    if (isTransitioning.current) {
+      const speed = LERP_SPEED * delta;
+      camera.position.lerp(targetPos.current, speed);
+
       if (orbitRef?.current) {
-        orbitRef.current.target.copy(targetLook.current);
+        orbitRef.current.target.lerp(targetLook.current, speed);
         orbitRef.current.update();
       }
-      isTransitioning.current = false;
+
+      const posDist = camera.position.distanceTo(targetPos.current);
+      if (posDist < 0.05) {
+        camera.position.copy(targetPos.current);
+        if (orbitRef?.current) {
+          orbitRef.current.target.copy(targetLook.current);
+          orbitRef.current.update();
+        }
+        isTransitioning.current = false;
+      }
     }
   });
 

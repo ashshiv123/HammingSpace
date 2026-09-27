@@ -1,6 +1,6 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stars } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 
 import TransmitterStation from './TransmitterStation';
 import NoisyChannel from './NoisyChannel';
@@ -12,36 +12,14 @@ import ZoneNav from './ZoneNav';
 import ModeSelector from './ModeSelector';
 import CustomLabHUD from './CustomLabHUD';
 
-function GroundPlane() {
-  return (
-    <mesh receiveShadow position={[0, -0.1, -4]} rotation={[-Math.PI / 2, 0, 0]}>
-      <planeGeometry args={[50, 40]} />
-      <meshStandardMaterial color="#1a1a24" />
-    </mesh>
-  );
-}
-
-function Lighting() {
-  return (
-    <>
-      <ambientLight intensity={0.35} color="#e8eaf6" />
-      <directionalLight
-        position={[10, 15, 8]}
-        intensity={0.5}
-        color="#ffffff"
-        castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
-        shadow-camera-far={50}
-        shadow-camera-left={-25}
-        shadow-camera-right={25}
-        shadow-camera-top={15}
-        shadow-camera-bottom={-15}
-      />
-      <directionalLight position={[-5, 3, 12]} intensity={0.15} color="#b3e5fc" />
-    </>
-  );
-}
+// Integrated visualization components from project_simulation
+import StudioRoom3D from './StudioRoom3D';
+import StageInstruction from './StageInstruction';
+import CalculationStepperBar from './CalculationStepperBar';
+import SessionLogPanel from './SessionLogPanel';
+import GameControllerHUD from './GameControllerHUD';
+import CalculationVisualizerDrawer from './CalculationVisualizerDrawer';
+import { useLabStore } from '../state/labStore';
 
 function ConnectionPath() {
   return (
@@ -84,17 +62,80 @@ function PathToHammingSpace() {
 export default function Lab3D() {
   const orbitRef = useRef();
   const [activeZone, setActiveZone] = useState('overview');
+  const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
+
+  // Stepper auto-playback hook
+  const calculationSteps = useLabStore((s) => s.calculationSteps);
+  const currentStepIndex = useLabStore((s) => s.currentStepIndex);
+  const isAnimationPlaying = useLabStore((s) => s.isAnimationPlaying);
+  const speedMultiplier = useLabStore((s) => s.speedMultiplier);
+  const nextStep = useLabStore((s) => s.nextStep);
+  const pauseAnimation = useLabStore((s) => s.pauseAnimation);
+
+  useEffect(() => {
+    if (!isAnimationPlaying || calculationSteps.length === 0) return;
+    if (currentStepIndex >= calculationSteps.length - 1) {
+      const timer = setTimeout(() => {
+        pauseAnimation();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+    const intervalMs = Math.round(900 / (speedMultiplier || 1));
+    const timer = setTimeout(() => {
+      nextStep();
+    }, intervalMs);
+    return () => clearTimeout(timer);
+  }, [isAnimationPlaying, currentStepIndex, calculationSteps.length, speedMultiplier, nextStep, pauseAnimation]);
 
   const handleNavigate = useCallback((zoneId) => {
     setActiveZone(zoneId);
   }, []);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', background: '#0a0a14' }}>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', background: '#0a0a14', overflow: 'hidden' }}>
+      {/* Top persistent pipeline state HUD */}
       <PipelineHUD />
-      <ZoneNav activeZone={activeZone} onNavigate={handleNavigate} />
+
+      {/* Mode selection & custom matrix lab HUDs */}
       <ModeSelector />
       <CustomLabHUD />
+
+      {/* Interactive Step-by-Step Calculation Stepper HUD */}
+      <CalculationStepperBar />
+
+      {/* Contextual bottom Stage Instruction HUD */}
+      <StageInstruction />
+
+      {/* Bottom navigation bar with Zone presets and "How Calculations Work" trigger */}
+      <ZoneNav
+        activeZone={activeZone}
+        onNavigate={handleNavigate}
+        onToggleVisualizer={() => setIsVisualizerOpen((v) => !v)}
+        isVisualizerOpen={isVisualizerOpen}
+      />
+
+      {/* Bottom-left corner: WASD Flight Controller and Session Log Inspector */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '58px',
+          left: '12px',
+          zIndex: 80,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          pointerEvents: 'auto',
+        }}
+      >
+        <GameControllerHUD onResetCamera={() => handleNavigate('overview')} />
+        <SessionLogPanel />
+      </div>
+
+      {/* Full 2D Mathematical Matrix Calculation Drawer Modal */}
+      <CalculationVisualizerDrawer
+        isOpen={isVisualizerOpen}
+        onClose={() => setIsVisualizerOpen(false)}
+      />
 
       <Canvas
         shadows
@@ -108,9 +149,10 @@ export default function Lab3D() {
         performance={{ min: 0.5 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <Lighting />
-        <Stars radius={80} depth={40} count={800} factor={3} fade speed={0.5} />
-        <GroundPlane />
+        {/* Modern Studio Room 3D with Oak Floor, Ambient Windows & Back Wall Display Board */}
+        <StudioRoom3D />
+
+        {/* Luminous Walkway Pathways */}
         <ConnectionPath />
         <PathToHammingSpace />
 
@@ -130,9 +172,9 @@ export default function Lab3D() {
           ref={orbitRef}
           enableDamping
           dampingFactor={0.08}
-          minDistance={3}
-          maxDistance={40}
-          maxPolarAngle={Math.PI / 2.1}
+          minDistance={2}
+          maxDistance={45}
+          maxPolarAngle={Math.PI / 2.05}
         />
         <CameraController activeZone={activeZone} orbitRef={orbitRef} />
       </Canvas>
