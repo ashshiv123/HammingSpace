@@ -15,6 +15,11 @@ import {
   buildSyndromeTable,
   correct as gf2Correct,
 } from '../lib/gf2.js';
+import {
+  generateEncodingSteps,
+  generateSyndromeSteps,
+  generateCorrectionSteps,
+} from '../lib/calculationStepper.js';
 
 // Default (7,4) Hamming Code
 const DEFAULT_G = [
@@ -61,6 +66,13 @@ export const useLabStore = create((set, get) => {
     _syndromeTable: sys.syndromeTable,
     _codewords: sys.codewords,
 
+    // ── Calculation Stepper State (from project_simulation integration) ──
+    calculationSteps: [],
+    currentStepIndex: 0,
+    isAnimationPlaying: false,
+    speedMultiplier: 1,
+    showLiveHUD: true,
+
     setMessageBit: (index, value) => {
       const { m } = get();
       if (index < 0 || index >= m.length) return;
@@ -72,11 +84,16 @@ export const useLabStore = create((set, get) => {
     encode: () => {
       const { m, G, n, sessionEvents } = get();
       const c = gf2Encode(m, G);
+      const steps = generateEncodingSteps(m, G);
       set({
         c, e: zeroVec(n), r: [...c], S: [], corrected: zeroVec(n),
         errorPosition: null, correctable: true, verdict: 'idle',
         currentStage: 'encoded',
         beyondGuaranteedCorrection: false,
+        calculationSteps: steps,
+        currentStepIndex: 0,
+        isAnimationPlaying: true,
+        showLiveHUD: true,
         sessionEvents: [...sessionEvents, { type: 'encode', vectorSnapshot: [...c], timestamp: new Date().toISOString() }],
       });
     },
@@ -116,9 +133,14 @@ export const useLabStore = create((set, get) => {
         }
       }
       const verdict = isClean ? 'clean' : correctable ? 'detected' : 'uncorrectable';
+      const steps = generateSyndromeSteps(r, H, _syndromeTable);
       set({
         S, correctable, errorPosition, verdict, currentStage: 'decoded',
         beyondGuaranteedCorrection,
+        calculationSteps: steps,
+        currentStepIndex: 0,
+        isAnimationPlaying: true,
+        showLiveHUD: true,
         sessionEvents: [...sessionEvents, { type: 'decode', vectorSnapshot: [...S], verdict, timestamp: new Date().toISOString() }],
       });
     },
@@ -127,8 +149,14 @@ export const useLabStore = create((set, get) => {
       const { r, H, _syndromeTable, correctable, sessionEvents } = get();
       if (!correctable) return;
       const { corrected, errorPosition } = gf2Correct(r, H, _syndromeTable);
+      const errPos0 = errorPosition !== null ? errorPosition - 1 : -1;
+      const steps = generateCorrectionSteps(r, errPos0, H);
       set({
         corrected, errorPosition, verdict: 'corrected', currentStage: 'corrected',
+        calculationSteps: steps,
+        currentStepIndex: 0,
+        isAnimationPlaying: true,
+        showLiveHUD: true,
         sessionEvents: [...sessionEvents, { type: 'correct', vectorSnapshot: [...corrected], errorPosition, timestamp: new Date().toISOString() }],
       });
     },
@@ -139,10 +167,105 @@ export const useLabStore = create((set, get) => {
         m: zeroMsg(k), c: zeroVec(n), e: zeroVec(n), r: zeroVec(n),
         S: [], corrected: zeroVec(n), errorPosition: null, correctable: true,
         verdict: 'idle', currentStage: 'compose', sessionEvents: [],
+        // also reset stepper
+        calculationSteps: [], currentStepIndex: 0, isAnimationPlaying: false, showLiveHUD: true,
       });
     },
 
     setMode: (newMode) => set({ mode: newMode }),
+
+    // ── Calculation Stepper Actions (from project_simulation integration) ──
+
+    /** Toggle a message bit (alias for setMessageBit, matching project_simulation API) */
+    toggleMessageBit: (index) => get().setMessageBit(index),
+
+    /** Apply custom generator matrix G */
+    setCustomG: (newG) => {
+      try {
+        const sys = buildCodeSystem(newG);
+        const k = newG.length;
+        const n = newG[0].length;
+        set({
+          G: newG, H: sys.H, n, k,
+          dMin: sys.dMin, t: sys.t,
+          _syndromeTable: sys.syndromeTable, _codewords: sys.codewords,
+          m: zeroMsg(k), c: zeroVec(n), e: zeroVec(n), r: zeroVec(n),
+          S: [], corrected: zeroVec(n), errorPosition: null, correctable: true,
+          verdict: 'idle', currentStage: 'compose', sessionEvents: [],
+          calculationSteps: [], currentStepIndex: 0, isAnimationPlaying: false,
+        });
+        return true;
+      } catch (err) {
+        console.error('setCustomG failed:', err);
+        return false;
+      }
+    },
+
+    startEncodingAnimation: () => {
+      const { m, G } = get();
+      const steps = generateEncodingSteps(m, G);
+      if (steps.length === 0) return;
+      set({
+        calculationSteps: steps,
+        currentStepIndex: 0,
+        isAnimationPlaying: true,
+        showLiveHUD: true,
+      });
+    },
+
+    startDecodingAnimation: () => {
+      const { r, H, _syndromeTable } = get();
+      const steps = generateSyndromeSteps(r, H, _syndromeTable);
+      if (steps.length === 0) return;
+      set({
+        calculationSteps: steps,
+        currentStepIndex: 0,
+        isAnimationPlaying: true,
+        showLiveHUD: true,
+      });
+    },
+
+    startCorrectionAnimation: () => {
+      const { r, errorPosition, H } = get();
+      const errorPos0 = errorPosition !== null ? errorPosition - 1 : -1; // convert 1-based to 0-based
+      const steps = generateCorrectionSteps(r, errorPos0, H);
+      if (steps.length === 0) return;
+      set({
+        calculationSteps: steps,
+        currentStepIndex: 0,
+        isAnimationPlaying: true,
+        showLiveHUD: true,
+      });
+    },
+
+    playAnimation: () => set({ isAnimationPlaying: true }),
+    pauseAnimation: () => set({ isAnimationPlaying: false }),
+
+    nextStep: () => {
+      const { calculationSteps, currentStepIndex } = get();
+      if (calculationSteps.length === 0) return;
+      const nextIdx = currentStepIndex + 1;
+      if (nextIdx >= calculationSteps.length) {
+        set({ isAnimationPlaying: false });
+        return;
+      }
+      set({ currentStepIndex: nextIdx });
+    },
+
+    prevStep: () => {
+      const { currentStepIndex } = get();
+      if (currentStepIndex > 0) {
+        set({ currentStepIndex: currentStepIndex - 1, isAnimationPlaying: false });
+      }
+    },
+
+    replayAnimation: () => set({ currentStepIndex: 0, isAnimationPlaying: true }),
+
+    skipAnimation: () => set({ calculationSteps: [], currentStepIndex: 0, isAnimationPlaying: false }),
+
+    setSpeedMultiplier: (mult) => set({ speedMultiplier: mult }),
+    setShowLiveHUD: (show) => set({ showLiveHUD: show }),
+    dismissLiveHUD: () => set({ showLiveHUD: false }),
   };
 });
 

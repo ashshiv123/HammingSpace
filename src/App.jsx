@@ -1,8 +1,8 @@
 import React from 'react';
-import Lab3D from './components/Lab3D';
+import SimulationApp from './SimulationApp';
 
 function App() {
-  return <Lab3D />;
+  return <SimulationApp />;
 }
 
 export default App;
