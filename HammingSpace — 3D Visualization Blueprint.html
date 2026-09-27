@@ -1,0 +1,237 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body>
+<h1>HammingSpace — 3D Visualization &amp; Simulation Concept Blueprint</h1>
+<p><em>A conceptual design for turning Linear Block Code mathematics into a physical, interactive experience</em></p>
+<hr>
+<h2>A. Vision</h2>
+<p><strong>HammingSpace is a &quot;data hospital.&quot;</strong> A student walks in holding a healthy 4-bit message. They watch it get inoculated with redundancy at the Transmitter, sent out into a channel that can wound it, and then examined, diagnosed, and healed at the Receiver. Every equation in the linear-block-code pipeline is re-cast as a physical event in this hospital: building, injury, diagnosis, and repair — not four unrelated whiteboard formulas, but one continuous story happening to one object the student can see the whole time.</p>
+<p>The single sentence that should describe the experience: <strong>&quot;I watched my own message get protected, get hurt, and get healed — and I could see exactly why it survived.&quot;</strong></p>
+<hr>
+<h2>B. Core Learning Objective</h2>
+<p>After using the simulation, a student should be able to say, without needing the formulas in front of them:</p>
+<ol>
+<li>Parity bits are <em>computed</em> from the message, not attached arbitrarily.</li>
+<li><code>G</code> is a <strong>rulebook of basis patterns</strong> — the message <em>selects and combines</em> rows of <code>G</code>; it doesn't get processed by a mysterious black box.</li>
+<li>A codeword is a <strong>single object</strong> made of two fused parts: the original information and its calculated protection.</li>
+<li>Noise is a <strong>local, physical event</strong> — it touches specific bit positions, nothing more.</li>
+<li><code>H</code> is a <strong>checking rulebook</strong>, structurally different in purpose from <code>G</code>, whose columns are literally the &quot;addresses&quot; of bit positions.</li>
+<li>The <strong>syndrome is a fingerprint</strong>, not a random number — it is produced by simple checks and matched against <code>H</code>'s columns like a lookup.</li>
+<li><strong>Hamming distance is a physical gap</strong> in a data landscape, and correction is &quot;snapping back&quot; to the nearest safe location in that landscape.</li>
+<li>Every code has a <strong>breaking point</strong> — correction capability is a geometric consequence of how far apart valid codewords are, not a magic guarantee.</li>
+</ol>
+<p>The formulas (<code>c = mG</code>, <code>S = rHᵀ</code>) should feel, by the end, like <em>captions</em> for something the student already watched happen — not the source of the idea.</p>
+<hr>
+<h2>C. World / Environment Design</h2>
+<p>The lab is one continuous space divided into four zones, connected by a visible corridor so the student never loses the sense that this is one pipeline.</p>
+<p><strong>1. Transmitter Station</strong> — a clean, &quot;construction&quot; aesthetic. Contains the message console (k toggles), the Generator Matrix rig, the combination/assembly area where the codeword is built, and an &quot;Encode &amp; Send&quot; control. Mood: <em>build</em>.</p>
+<p><strong>2. The Noisy Channel</strong> — a corridor between the two stations, visually turbulent but restrained (drifting particles, faint interference bands) so it reads as &quot;hazard zone,&quot; never sci-fi spectacle. Contains a monitoring HUD showing <code>c</code>, <code>e</code>, <code>r</code> side by side as the packet transits. Mood: <em>risk</em>.</p>
+<p><strong>3. Receiver Station</strong> — an &quot;inspection&quot; aesthetic, cooler tones, more clinical/diagnostic than the Transmitter. Contains the received-vector display, the Parity Check Matrix rig, the syndrome console, the column-matching board, and the correction/repair mechanism. Mood: <em>diagnose and heal</em>.</p>
+<p><strong>4. Hamming Space (Codeword Constellation)</strong> — a separate, zoomable 3D chamber reachable at any time, showing valid codewords as points in a data landscape, with the current received vector's position and its distance to its neighbors made visible. This is the &quot;map room&quot; that explains <em>why</em> the hospital works at all.</p>
+<p><strong>5. HUD Pipeline Strip</strong> — a persistent, always-visible strip across the top of the whole experience: <code>m → G → c → e → r → H → S → position → correction</code>, with the current stage lit up, so the student is never lost inside a single zone.</p>
+<hr>
+<h2>D. Complete User Journey</h2>
+<ol>
+<li><strong>Create the message.</strong> The student flips k physical switches; <code>m</code> becomes a row of lit/unlit nodes.</li>
+<li><strong>Meet G.</strong> The Generator rig appears, split visibly into an identity block and a parity block.</li>
+<li><strong>Watch encoding.</strong> Selecting <code>m</code> triggers only the rows of <code>G</code> that correspond to 1-bits to move, glow, and merge.</li>
+<li><strong>See the XOR fuse.</strong> Wherever rows overlap, a quick GF(2) micro-animation shows the combine rule (1+1→0, etc.).</li>
+<li><strong>Codeword is born.</strong> A new n-bit object assembles from the message part and the freshly computed parity part, visually seamed together.</li>
+<li><strong>Send.</strong> The codeword travels down the channel corridor as one physical packet.</li>
+<li><strong>Injury.</strong> The student (or a partner) strikes a bit mid-flight; that node visibly flips, and a small &quot;error object&quot; <code>e</code> appears alongside it.</li>
+<li><strong>Arrival as r.</strong> The packet lands at the Receiver looking identical in shape to <code>c</code>, but the struck bit is visibly different — the student can already almost tell something is off before any math runs.</li>
+<li><strong>Meet H.</strong> The Parity Check rig appears, its columns visibly labeled by bit position.</li>
+<li><strong>Run the checks.</strong> Each check in <code>H</code> &quot;reads&quot; the received bits it's responsible for and reports a single result; three such results assemble into <code>S</code>.</li>
+<li><strong>Diagnostic reveal.</strong> <code>S</code> lights up as a 3-bit signature. If it's <code>000</code>, a &quot;healthy&quot; signal fires. If not, an alert fires.</li>
+<li><strong>Match the fingerprint.</strong> <code>S</code> is compared against all columns of <code>H</code>; the matching column glows.</li>
+<li><strong>Locate.</strong> The matched column points directly at the damaged bit position.</li>
+<li><strong>Correct.</strong> That bit visibly flips back; the packet becomes indistinguishable from the original <code>c</code>.</li>
+<li><strong>Recover the message.</strong> The identity portion of the corrected codeword is lifted out and displayed as the original <code>m</code>.</li>
+<li><strong>Reflect.</strong> The Hamming Space view shows the whole journey as a short hop away from a valid point and back.</li>
+</ol>
+<hr>
+<h2>E. Visualizing Every Mathematical Concept</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Physical Representation</th>
+<th>What it Teaches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>m</strong></td>
+<td>k glowing/dark switch-nodes on a console</td>
+<td>The message is a <em>thing</em>, not an abstraction</td>
+</tr>
+<tr>
+<td><strong>G</strong></td>
+<td>A rig split into an identity block and a parity block, each row a distinct &quot;basis pattern&quot; object</td>
+<td>G is a rulebook, not a black box</td>
+</tr>
+<tr>
+<td><strong>Parity bits</strong></td>
+<td>Nodes that visibly light up <em>only after</em> being fed by specific message nodes</td>
+<td>Redundancy is computed, not arbitrary</td>
+</tr>
+<tr>
+<td><strong>c</strong></td>
+<td>A single fused n-bit packet, message part and parity part seamed together</td>
+<td>Protection is structural, part of one object</td>
+</tr>
+<tr>
+<td><strong>e</strong></td>
+<td>A small &quot;damage marker&quot; appearing at exactly the struck position, all-zero elsewhere</td>
+<td>Error is local and sparse</td>
+</tr>
+<tr>
+<td><strong>r</strong></td>
+<td>The packet, now showing one (or more) altered nodes</td>
+<td>What the receiver <em>actually</em> has, vs. what was sent</td>
+</tr>
+<tr>
+<td><strong>H</strong></td>
+<td>A rig of labeled columns, each column = one bit position's &quot;identity tag&quot;</td>
+<td>Checking has a different shape/purpose than building</td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>A 3-node diagnostic readout, either &quot;ALL CLEAR&quot; or an alert pattern</td>
+<td>The syndrome is evidence, not an arbitrary number</td>
+</tr>
+<tr>
+<td><strong>Hamming weight</strong></td>
+<td>Count of lit nodes in a vector, shown as a running tally</td>
+<td>&quot;How much&quot; a vector differs from all-zero</td>
+</tr>
+<tr>
+<td><strong>Hamming distance</strong></td>
+<td>A measured gap between two points/objects, with differing positions highlighted</td>
+<td>Distance is spatial, countable, visible</td>
+</tr>
+<tr>
+<td><strong>d_min</strong></td>
+<td>The shortest visible gap between any two valid points in Hamming Space</td>
+<td>Codes have a built-in safety margin</td>
+</tr>
+<tr>
+<td><strong>t</strong></td>
+<td>A visible &quot;correction radius&quot; sphere/halo around each valid point, sized from d_min</td>
+<td>Correction capability is geometric, not arbitrary</td>
+</tr>
+<tr>
+<td><strong>Linearity</strong></td>
+<td>Combining two valid codewords (via the same XOR fuse animation) and showing the result is <em>also</em> a valid point</td>
+<td>The code's structure is self-consistent everywhere, not just at the one example</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>F. How G Should Be Visualized</h2>
+<p>G should never simply &quot;appear&quot; and instantly produce an answer. It must be shown as <code>G = [ I | P ]</code> — an <strong>identity half</strong> that plainly says &quot;this part of the codeword <em>is</em> the message,&quot; and a <strong>parity half</strong> that says &quot;this part is <em>computed from</em> the message.&quot;</p>
+<p>When the student selects a bit of <code>m</code>, the corresponding row of <code>G</code> — a specific basis pattern — should visibly activate, travel, and overlap with any other active rows. Where activated rows overlap, the GF(2) fuse animation resolves the overlap into a single bit (<code>1+1=0</code>, <code>1+0=1</code>, etc.), making it visually undeniable that <strong>matrix multiplication is combination of pre-stored patterns, not calculator magic</strong>. Editing <code>G</code> (Custom Mode) should immediately and visibly change which parity nodes react to which message nodes — cause and effect must be instantaneous and legible.</p>
+<hr>
+<h2>G. How H Should Be Visualized</h2>
+<p>H is the mirror-opposite tool: build vs. check. Each of its n columns should be visually tagged with the bit position it &quot;owns&quot; — ideally shown being <em>constructed</em> once, from each position's unique short binary address (1→001, 2→010, 3→011, …), so the student sees where H's columns come from rather than accepting them as given.</p>
+<p>Syndrome calculation should unfold as a small sequence of independent checks, each check reading only the received bits it cares about and reporting one bit of result. The three results assemble into <code>S</code>. Then — the single most important animation in the whole simulation — <code>S</code> is swept across all of H's columns until one matches, and that column lights up and draws a direct line to the damaged bit position. <strong>Syndrome decoding should feel like a fingerprint scan, not algebra.</strong></p>
+<hr>
+<h2>H. Hamming Space Visualization</h2>
+<p>A dedicated 3D chamber renders every valid codeword as a point in a small data landscape (for (7,4), 16 such points). The received vector, when corrupted, appears as a point <em>displaced</em> from its home codeword by exactly as many steps as bits were flipped — and the displaced positions are highlighted, not just counted.</p>
+<p>Each valid point carries a visible &quot;correction halo&quot; whose radius is <code>t</code>. If the received point falls inside a halo, correction is a <strong>snap</strong> back to that halo's center. If it falls in contested territory between two halos (more errors than <code>t</code>), the simulation should visibly show the ambiguity — the point sits nearer to, or equidistant from, a <em>different</em> valid point than the one it came from. This is where the abstract idea of &quot;the code has limits&quot; becomes a literal, visible fact about the geometry of the space.</p>
+<hr>
+<h2>I. Error Simulation</h2>
+<ul>
+<li><strong>No error:</strong> the packet arrives unchanged; the syndrome fires &quot;ALL CLEAR&quot; instantly, and the correction stage is skipped with a visible &quot;not needed&quot; state — success should feel calm, not anticlimactic.</li>
+<li><strong>One error:</strong> the full detect → locate → correct sequence runs, ending in visible repair.</li>
+<li><strong>Multiple errors (beyond t):</strong> the student can deliberately strike more than <code>t</code> bits. The syndrome still produces <em>a</em> signature, and the system still points at <em>a</em> column — but the simulation must show that this pointed-to position <strong>may not be the true error</strong>, and the corrected result may land on the <em>wrong</em> valid codeword. This failure must be shown plainly, with a clear &quot;BEYOND GUARANTEED CORRECTION&quot; state, not hidden or glossed over.</li>
+<li><strong>Correctable vs. uncorrectable, side by side:</strong> a compact readout always shows <code>t</code> (capability) against the number of injected errors, so the student can predict the outcome before it happens and then check their prediction.</li>
+</ul>
+<hr>
+<h2>J. Custom (n, k) Laboratory</h2>
+<p>Changing <code>n</code> or <code>k</code> should visibly reshape the whole lab in real time: the message console gains or loses switches, the codeword packet gains or loses nodes, the parity block of <code>G</code> and the column count of <code>H</code> resize, and the Hamming Space chamber's population of valid points visibly grows or shrinks. The point is that a student turning a dial for <code>k</code> should <em>see</em> the whole apparatus breathe in response — code rate, redundancy, and syndrome size should feel like consequences of one physical choice, not separately computed numbers.</p>
+<hr>
+<h2>K. Interactive Modes</h2>
+<ul>
+<li><strong>Beginner Mode:</strong> message → parity → codeword → error → correction only; no matrix jargon on screen.</li>
+<li><strong>Guided Teaching Mode:</strong> the 10-stage paced walkthrough, one idea revealed at a time, nothing else visible until it's needed.</li>
+<li><strong>Free Experimentation Mode:</strong> full manual control over message, error injection, and stepping through stages at will.</li>
+<li><strong>Custom Code Mode:</strong> editable <code>(n,k)</code>, <code>G</code>, and <code>H</code>, with the lab reshaping live as described in section J.</li>
+<li><strong>Capacity Test Mode:</strong> a focused sandbox for injecting 0, 1, 2, 3... errors and watching exactly where correction succeeds and where it breaks.</li>
+<li><strong>Collaborative Noise-Controller Mode:</strong> two roles — an Encoder who builds and sends, and a Noise Controller who decides where and how much to strike — turning the whole pipeline into a shared, suspenseful &quot;will it survive&quot; moment without ever leaving the math behind.</li>
+</ul>
+<hr>
+<h2>L. The AHA Moments</h2>
+<ol>
+<li><em>&quot;The parity bits aren't random — they're computed from my message.&quot;</em></li>
+<li><em>&quot;G is just a compact rulebook of patterns my message selects and combines.&quot;</em></li>
+<li><em>&quot;The codeword is my message plus its own calculated protection, fused into one object.&quot;</em></li>
+<li><em>&quot;The channel didn't scramble everything — it only touched one specific spot.&quot;</em></li>
+<li><em>&quot;H is a completely different tool from G: it checks, it doesn't build.&quot;</em></li>
+<li><em>&quot;The syndrome isn't a mystery number — it's literally a fingerprint of the damage.&quot;</em></li>
+<li><em>&quot;011 matches column 3 of H — that's <em>how</em> the receiver knows, without ever seeing my original message.&quot;</em></li>
+<li><em>&quot;Hamming distance is why this works — and why, past a point, it stops working.&quot;</em></li>
+</ol>
+<hr>
+<h2>M. The Exact Demo Story, Beat by Beat</h2>
+<ul>
+<li>Student sets <code>m = 1011</code> — four nodes light up: on, off, on, on.</li>
+<li><code>G</code>'s identity rows glow instantly (they <em>are</em> the message); rows 1, 3, 4 of the parity half activate and fuse to compute the parity bits.</li>
+<li>The codeword <code>c = 1011010</code> assembles as one seven-node packet, seam visible between message and parity halves.</li>
+<li>The packet travels the channel corridor. The Noise Controller strikes bit 3; that node flips live, and a small <code>e = 0010000</code> marker appears beside it.</li>
+<li>The packet lands as <code>r = 1001010</code> — visibly one node different from what left the Transmitter.</li>
+<li><code>H</code>'s three checks run against <code>r</code>; their results assemble into <code>S = 011</code>, displayed as an alert.</li>
+<li><code>S = 011</code> sweeps across H's seven columns; column 3 lights up and draws a line straight to bit 3 of the packet.</li>
+<li>Bit 3 visibly flips back; the packet becomes <code>1011010</code> again, matching the original exactly.</li>
+<li>The identity portion is lifted out and displayed as the recovered message: <code>1011</code>.</li>
+<li>In Hamming Space, this whole sequence appears as: a valid point → a one-step displacement → a snap back to the same point.</li>
+</ul>
+<hr>
+<h2>N. Visual Language</h2>
+<ul>
+<li><strong>Shape language:</strong> bits are small spherical/node objects (dark = 0, lit = 1); matrices are structured racks of rows/columns, never flat spreadsheets; the codeword is one continuous strand of nodes, visually seamed where message meets parity.</li>
+<li><strong>Motion language:</strong> <em>building</em> motions are additive and converging (rows sliding together, fusing); <em>damage</em> motions are sharp and localized (a single strike, a single flip); <em>diagnosis</em> motions are sweeping and searching (a syndrome scanning across columns); <em>correction</em> motion is a snap — quick, decisive, returning to rest.</li>
+<li><strong>Spatial metaphors:</strong> the Transmitter is &quot;construction,&quot; the Receiver is &quot;clinic,&quot; the channel is &quot;hazard corridor,&quot; Hamming Space is &quot;map/landscape.&quot;</li>
+<li><strong>Color/identity contrast:</strong> G reads as warm/generative (&quot;build&quot; language); H reads as cool/analytical (&quot;check&quot; language) — the two should never be visually confusable.</li>
+<li><strong>Diagnostic visualization:</strong> the syndrome is always shown as a compact, alert-like readout — plain &quot;clear&quot; state vs. an unmistakable &quot;signature detected&quot; state.</li>
+<li><strong>Correction visualization:</strong> always a visible before/after pair (damaged node → healed node), never an instant silent substitution.</li>
+</ul>
+<hr>
+<h2>O. Anti-Patterns — What Not To Do</h2>
+<ul>
+<li>Do not show an equation appearing on screen with no animation behind it — every formula must be a <em>caption</em> for something already shown happening.</li>
+<li>Do not use 3D flourishes (particles, glow, camera moves) that don't map to a specific concept — every visual element must answer &quot;what does this teach?&quot;</li>
+<li>Do not front-load Level 3/4 complexity (custom matrices, multi-error edge cases) on a first-time user — earn complexity progressively.</li>
+<li>Do not hide or soften a failed correction — an uncorrectable error is one of the most important lessons in the whole simulation.</li>
+<li>Do not let G and H look, move, or feel similar — confusing the two is one of the most common student errors this design must actively prevent.</li>
+<li>Do not let the syndrome-to-column match happen invisibly or instantly — the sweep-and-match moment is the single highest-value animation in the experience and must be given room to land.</li>
+<li>Do not turn the Noise-Controller collaboration into a competitive game that overshadows the underlying lesson — the goal is shared discovery, not scorekeeping.</li>
+</ul>
+<hr>
+<h2>P. Final One-Page Concept</h2>
+<pre><code>MESSAGE  (k lit/unlit nodes — the information)
+   ↓  selects &amp; combines rows of...
+GENERATOR MATRIX  (build rulebook: identity + parity)
+   ↓  fuse via GF(2)
+CODEWORD  (n-node protected packet)
+   ↓  travels through...
+NOISY CHANNEL  (hazard corridor)
+   ↓  localized strike
+ERROR  (sparse damage marker)
+   ↓  arrives as...
+RECEIVED VECTOR  (packet, one node different)
+   ↓  tested against...
+PARITY CHECK MATRIX  (check rulebook: column = bit address)
+   ↓  assembles into...
+SYNDROME  (diagnostic fingerprint)
+   ↓  matched against H&#39;s columns
+ERROR LOCATION  (pinpointed bit)
+   ↓  snap back
+CORRECTION  (repaired node)
+   ↓
+VALID CODEWORD  (restored packet)
+   ↓  identity half extracted
+ORIGINAL MESSAGE  (recovered — the loop closes)
+</code></pre>
+<p><strong>One line to remember:</strong> every arrow in this diagram is not a calculation the student must trust — it is a physical event the student has already watched happen.</p>
+
+</body></html>
