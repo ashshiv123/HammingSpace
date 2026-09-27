@@ -76,11 +76,13 @@ export const useLabStore = create((set, get) => {
         c, e: zeroVec(n), r: [...c], S: [], corrected: zeroVec(n),
         errorPosition: null, correctable: true, verdict: 'idle',
         currentStage: 'encoded',
+        beyondGuaranteedCorrection: false,
         sessionEvents: [...sessionEvents, { type: 'encode', vectorSnapshot: [...c], timestamp: new Date().toISOString() }],
       });
     },
 
     setStage: (stage) => set({ currentStage: stage }),
+    transmitToReceiver: () => set({ currentStage: 'received' }),
 
     injectErrorAtPosition: (pos1) => {
       const { c, e: curE, sessionEvents } = get();
@@ -95,10 +97,14 @@ export const useLabStore = create((set, get) => {
     },
 
     decode: () => {
-      const { r, H, _syndromeTable, sessionEvents } = get();
+      const { r, H, e, t, _syndromeTable, sessionEvents } = get();
       const S = gf2Syndrome(r, H);
       const isClean = S.every(b => b === 0);
       let correctable = false, errorPosition = null;
+
+      const actualErrorWeight = e.reduce((acc, bit) => acc + bit, 0);
+      const beyondGuaranteedCorrection = actualErrorWeight > t;
+
       if (isClean) { correctable = true; }
       else {
         const key = S.join(',');
@@ -112,6 +118,7 @@ export const useLabStore = create((set, get) => {
       const verdict = isClean ? 'clean' : correctable ? 'detected' : 'uncorrectable';
       set({
         S, correctable, errorPosition, verdict, currentStage: 'decoded',
+        beyondGuaranteedCorrection,
         sessionEvents: [...sessionEvents, { type: 'decode', vectorSnapshot: [...S], verdict, timestamp: new Date().toISOString() }],
       });
     },

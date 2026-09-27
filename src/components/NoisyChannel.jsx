@@ -10,6 +10,7 @@ import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
+import { useLabStore } from '../state/labStore.js';
 
 const CHANNEL_LENGTH = 10;
 const CHANNEL_WIDTH = 3;
@@ -66,6 +67,9 @@ function ChannelParticles({ count = 60 }) {
 }
 
 export default function NoisyChannel() {
+  const currentStage = useLabStore((s) => s.currentStage);
+  const transmit = useLabStore((s) => s.transmitToReceiver);
+
   return (
     <group position={[0, 0, 0]}>
       {/* Corridor floor */}
@@ -112,6 +116,25 @@ export default function NoisyChannel() {
         <Text position={[0, 0, 0]} fontSize={0.2} color="#ef9a9a" anchorX="center">e = error</Text>
         <Text position={[2.5, 0, 0]} fontSize={0.2} color="#90caf9" anchorX="center">r = received</Text>
       </group>
+
+      {currentStage === 'in-flight' && (
+        <group position={[0, 1.5, 1.5]}>
+          <mesh
+            onClick={(e) => { e.stopPropagation(); transmit(); }}
+            onPointerOver={() => document.body.style.cursor='pointer'}
+            onPointerOut={() => document.body.style.cursor='default'}
+          >
+            <boxGeometry args={[3.0, 0.6, 0.2]} />
+            <meshStandardMaterial color="#00e676" emissive="#00e676" emissiveIntensity={0.3} />
+          </mesh>
+          <Text position={[0, 0, 0.11]} fontSize={0.2} color="#000" fontWeight="bold">
+            SEND TO RECEIVER →
+          </Text>
+          <Text position={[0, -0.6, 0]} fontSize={0.16} color="#fff">
+            Click packet bits to inject noise!
+          </Text>
+        </group>
+      )}
 
       <ChannelParticles />
       <pointLight position={[0, 3, 0]} intensity={0.3} color="#64b5f6" />

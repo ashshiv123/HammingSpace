@@ -303,6 +303,12 @@ function GeneratorMatrixRig({ G, m, animOffset }) {
 // Component: GF(2) Fuse Micro-Animation & Codeword Assembly (Task 3 & 4)
 // -----------------------------------------------------------------------------
 function CodewordAssembly({ animState, codeword, launchProgress }) {
+  const currentStage = useLabStore((s) => s.currentStage);
+  const injectErrorAtPosition = useLabStore((s) => s.injectErrorAtPosition);
+  const e = useLabStore((s) => s.e);
+
+  if (['received', 'decoded', 'corrected'].includes(currentStage)) return null;
+
   const { stage, fuseColText } = animState;
   const n = codeword.length; // 7
 
@@ -385,35 +391,62 @@ function CodewordAssembly({ animState, codeword, launchProgress }) {
         {codeword.map((val, idx) => {
           const isMsg = idx < 4;
           const nodeX = (idx - 3) * 0.7;
+          const isFlipped = e[idx] === 1;
+          const nodeRot = isFlipped ? [Math.PI / 3, Math.PI / 4, 0] : [0, 0, 0];
+          const canInject = currentStage === 'in-flight';
 
           return (
             <group key={idx} position={[nodeX, 0, 0]}>
-              {/* Node Sphere */}
-              <mesh>
-                <sphereGeometry args={[0.22, 20, 20]} />
-                <meshStandardMaterial
-                  color={
-                    val === 1
-                      ? isMsg ? PALETTE.identity : PALETTE.parity
-                      : '#37474f'
-                  }
-                  emissive={
-                    val === 1
-                      ? isMsg ? PALETTE.identity : PALETTE.parity
-                      : '#111'
-                  }
-                  emissiveIntensity={val === 1 ? 0.9 : 0.1}
-                  roughness={0.2}
-                />
-              </mesh>
+              {/* Node Sphere and Text rotated on damage */}
+              <group rotation={nodeRot}>
+                <mesh
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                    if (canInject) injectErrorAtPosition(idx + 1);
+                  }}
+                  onPointerOver={(evt) => {
+                    if (canInject) document.body.style.cursor = 'pointer';
+                  }}
+                  onPointerOut={(evt) => {
+                    document.body.style.cursor = 'default';
+                  }}
+                >
+                  <sphereGeometry args={[0.22, 20, 20]} />
+                  <meshStandardMaterial
+                    color={
+                      val === 1
+                        ? isMsg ? PALETTE.identity : PALETTE.parity
+                        : '#37474f'
+                    }
+                    emissive={
+                      val === 1
+                        ? isMsg ? PALETTE.identity : PALETTE.parity
+                        : '#111'
+                    }
+                    emissiveIntensity={val === 1 ? 0.9 : 0.1}
+                    roughness={0.2}
+                  />
+                </mesh>
 
-              {/* Bit value label */}
-              <Text position={[0, 0.32, 0]} fontSize={0.16} color="#fff" fontWeight="bold">
-                {String(val)}
-              </Text>
-              <Text position={[0, -0.32, 0]} fontSize={0.11} color={isMsg ? PALETTE.identity : PALETTE.parity}>
-                {isMsg ? `m${idx}` : `p${idx - 4}`}
-              </Text>
+                {/* Bit value label */}
+                <Text position={[0, 0.32, 0]} fontSize={0.16} color="#fff" fontWeight="bold">
+                  {String(val)}
+                </Text>
+                <Text position={[0, -0.32, 0]} fontSize={0.11} color={isMsg ? PALETTE.identity : PALETTE.parity}>
+                  {isMsg ? `m${idx}` : `p${idx - 4}`}
+                </Text>
+              </group>
+
+              {/* Error Marker e */}
+              {isFlipped && (
+                <group position={[0, -0.6, 0]}>
+                  <mesh>
+                    <boxGeometry args={[0.2, 0.2, 0.2]} />
+                    <meshStandardMaterial color="#ff5252" emissive="#ff5252" emissiveIntensity={0.5} />
+                  </mesh>
+                  <Text position={[0, 0, 0.15]} fontSize={0.14} color="#fff" fontWeight="bold">e</Text>
+                </group>
+              )}
             </group>
           );
         })}
