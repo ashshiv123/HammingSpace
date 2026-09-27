@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Linear Block Code Lab</title>
+<style>
+:root{
+  --bg:#0b1220; --panel:#111a2e; --panel2:#0e1728; --border:#22304a;
+  --text:#e7ecf5; --muted:#8ca0be; --accent:#5fd4c4; --accent2:#e8a33d;
+  --danger:#e8615d; --good:#5fd98e;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top: env(safe-area-inset-top,0px);}
+body{
+  margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+  line-height:1.55; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+header{
+  padding:22px 20px 16px; border-bottom:1px solid var(--border); background:var(--panel2);
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:5;
+}
+header h1{margin:0; font-size:20px; letter-spacing:.02em; font-weight:650;}
+header .sub{color:var(--muted); font-size:13.5px; margin-top:4px;}
+main{max-width:880px; margin:0 auto; padding:20px 16px 60px;}
+.intro{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px;}
+.intro label{display:block; font-size:13px; color:var(--muted); margin-bottom:8px;}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+input[type=text]{
+  flex:1; min-width:160px; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+  font-family:var(--mono); font-size:18px; letter-spacing:.12em; padding:10px 12px; border-radius:8px;
+}
+button{
+  background:var(--accent); color:#08131b; border:none; font-weight:650; font-size:14px;
+  padding:10px 16px; border-radius:8px; cursor:pointer; font-family:var(--sans);
+}
+button.secondary{background:transparent; color:var(--text); border:1px solid var(--border);}
+button.warn{background:var(--accent2); color:#2a1a02;}
+button:disabled{opacity:.4; cursor:default;}
+.err{color:var(--danger); font-size:13px; margin-top:8px; min-height:16px;}
+.example{color:var(--muted); font-size:12.5px; margin-top:10px;}
+.example button{
+  background:none; border:none; color:var(--accent); font-family:var(--mono); font-size:12.5px;
+  padding:0 6px; cursor:pointer;
+}
+#wizard{display:none;}
+.progress{margin:18px 0 20px;}
+.progress .bar{height:5px; background:var(--panel); border:1px solid var(--border); border-radius:4px; overflow:hidden;}
+.progress .fill{height:100%; background:var(--accent); transition:width .25s ease;}
+.progress .label{color:var(--muted); font-size:12.5px; margin-top:6px;}
+.panel{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:22px; overflow-x:auto;}
+.panel h2{margin:0 0 4px; font-size:17px;}
+.panel h2 .tag{color:var(--accent); font-family:var(--mono); font-size:13px; margin-right:8px;}
+.panel p{margin:10px 0; font-size:14.5px;}
+.panel p.why{color:var(--muted);}
+code, .k{font-family:var(--mono); background:var(--panel2); border:1px solid var(--border); border-radius:4px; padding:1px 5px; font-size:13.5px;}
+.mathblock{
+  font-family:var(--mono); background:var(--panel2); border:1px solid var(--border); border-radius:8px;
+  padding:12px 14px; margin:12px 0; font-size:14px; white-space:pre-wrap; overflow-x:auto;
+}
+.grid{display:inline-grid; gap:3px; margin:10px 0;}
+.cell{
+  font-family:var(--mono); font-size:14px; width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+  border-radius:5px; background:var(--panel2); border:1px solid var(--border); user-select:none;
+}
+.cell.data{color:var(--accent);}
+.cell.parity{color:var(--accent2);}
+.cell.head{background:transparent; border:none; color:var(--muted); font-size:11.5px;}
+.cell.hi{outline:2px solid var(--accent); background:#163127;}
+.cell.click{cursor:pointer;}
+.cell.flip{background:var(--danger); color:#fff; border-color:var(--danger);}
+.legend{display:flex; gap:16px; font-size:12.5px; color:var(--muted); margin:8px 0 0; flex-wrap:wrap;}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.swatch{width:12px; height:12px; border-radius:3px; display:inline-block;}
+.matlabel{font-family:var(--mono); font-size:13px; color:var(--muted); margin:14px 0 4px;}
+.basisrow{
+  display:flex; align-items:center; gap:10px; padding:6px 10px; border:1px solid var(--border); border-radius:6px;
+  margin:5px 0; cursor:pointer; font-family:var(--mono); font-size:13px;
+}
+.basisrow:hover, .basisrow.active{border-color:var(--accent); background:#0f2a26;}
+.result{
+  border:1px solid var(--good); background:#0f2418; color:var(--good); border-radius:8px; padding:12px 14px;
+  font-family:var(--mono); margin-top:12px; font-size:14px;
+}
+.result.bad{border-color:var(--danger); background:#2a1414; color:#ff9d99;}
+.result.warn{border-color:var(--accent2); background:#2a2007; color:var(--accent2);}
+.navrow{display:flex; justify-content:space-between; margin-top:18px; gap:10px;}
+.hint{font-size:12.5px; color:var(--muted); margin-top:6px;}
+.checkpoint{border-top:1px dashed var(--border); margin-top:20px; padding-top:16px;}
+.checkpoint .ask{margin:0 0 10px; font-size:14px; color:var(--muted);}
+.checkpoint .row{display:flex; gap:10px; flex-wrap:wrap;}
+.recap{
+  margin-top:12px; padding:12px 14px; border-radius:8px; background:var(--panel2);
+  border:1px solid var(--accent2); color:var(--text); font-size:13.5px;
+}
+.recap b{color:var(--accent2);}
+.pill{display:inline-block; font-family:var(--mono); font-size:12px; padding:2px 8px; border:1px solid var(--border); border-radius:20px; color:var(--muted); margin-left:8px;}
+::selection{background:#1f4a43;}
+@media (max-width:520px){ .panel{padding:16px;} header h1{font-size:18px;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Linear Block Code Lab</h1>
+  <div class="sub">Encode, transmit, and decode — one reasoned step at a time</div>
+</header>
+<main>
+
+  <div class="intro" id="intro">
+    <label for="datain">Enter binary data (0s and 1s, any length)</label>
+    <div class="row">
+      <input type="text" id="datain" placeholder="e.g. 1011" maxlength="16" autocomplete="off" />
+      <button id="startBtn">Start learning</button>
+    </div>
+    <div class="err" id="inErr"></div>
+    <div class="example">Try:
+      <button data-ex="1011">1011</button>
+      <button data-ex="1010">1010</button>
+      <button data-ex="1011111">1011111</button>
+      <button data-ex="11001010">11001010</button>
+    </div>
+  </div>
+
+  <div id="wizard">
+    <div class="progress">
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="label" id="proglabel"></div>
+    </div>
+    <div class="panel" id="panel"></div>
+    <div class="navrow">
+      <button class="secondary" id="prevBtn">&larr; Previous</button>
+      <button class="secondary" id="restartBtn">Start over</button>
+      <button id="nextBtn">Continue &rarr;</button>
+    </div>
+  </div>
+
+</main>
+<script>
+"use strict";
+
+/* ---------- math engine (verified against 1011 / 1010 / 1011111 / 11001010) ---------- */
+function calcR(m){ let r=1; while(!(Math.pow(2,r) >= m+r+1)) r++; return r; }
+function isPow2(x){ return (x & (x-1))===0; }
+function buildPositions(n){
+  let dCount=0, arr=[];
+  for(let pos=1; pos<=n; pos++){
+    if(isPow2(pos)) arr.push({pos,type:'P'});
+    else { dCount++; arr.push({pos,type:'D',dIndex:dCount}); }
+  }
+  return arr;
+}
+function parityGroups(n,r){
+  let groups=[];
+  for(let i=0;i<r;i++){
+    let p=Math.pow(2,i), covered=[];
+    for(let pos=1;pos<=n;pos++){ if(pos!==p && (pos & p)!==0) covered.push(pos); }
+    groups.push({p,exp:i,covered});
+  }
+  return groups;
+}
+function computeInterleaved(dataBits,n,r){
+  let positions=buildPositions(n);
+  let cw=new Array(n+1).fill(0);
+  positions.forEach(p=>{ if(p.type==='D') cw[p.pos]=dataBits[p.dIndex-1]; });
+  let groups=parityGroups(n,r);
+  groups.forEach(g=>{ let v=0; g.covered.forEach(pos=>{v^=cw[pos];}); cw[g.p]=v; });
+  return {codeword:cw, positions, groups};
+}
+function buildPStructural(n,r){
+  let positions = buildPositions(n);
+  let groups = parityGroups(n,r);
+  let dataPositions = positions.filter(p=>p.type==='D');
+  let P = dataPositions.map(dp=> groups.map(g=> g.covered.includes(dp.pos) ? 1 : 0 ));
+  return {P, groups, positions, dataPositions};
+}
+function multiplyRow(m,G){
+  let k=m.length, n=G[0].length, c=new Array(n).fill(0);
+  for(let j=0;j<k;j++) if(m[j]===1) for(let col=0;col<n;col++) c[col]^=G[j][col];
+  return c;
+}
+function buildH(P,k,r){
+  let H=[];
+  for(let i=0;i<r;i++){
+    let row=[];
+    for(let j=0;j<k;j++) row.push(P[j][i]);
+    for(let jj=0;jj<r;jj++) row.push(jj===i?1:0);
+    H.push(row);
+  }
+  return H;
+}
+function syndrome(rVec,H){
+  let r=H.length, S=new Array(r).fill(0);
+  for(let i=0;i<r;i++){ let v=0; for(let col=0;col<rVec.length;col++) if(rVec[col]===1) v^=H[i][col]; S[i]=v; }
+  return S;
+}
+function weight(v){ return v.reduce((a,b)=>a+b,0); }
+function bin(n,len){ return n.toString(2).padStart(len,'0'); }
+
+/* ---------- state ---------- */
+let ST = null;
+function initState(dataStr){
+  let dataBits = dataStr.split('').map(Number);
+  let k = dataBits.length, r = calcR(k), n = k+r;
+  let {P, groups, positions, dataPositions} = buildPStructural(n,r);
+  let G=[];
+  for(let j=0;j<k;j++){ let row=new Array(k).fill(0); row[j]=1; G.push(row.concat(P[j])); }
+  let c = multiplyRow(dataBits,G);
+  let H = buildH(P,k,r);
+  return {
+    dataStr, dataBits, k, r, n, positions, groups, dataPositions, G, P, c, H,
+    flips: new Array(n).fill(0),
+    step: 0, basisActive: 0,
+    recap: new Array(STEPS.length).fill(false)
+  };
+}
+
+/* ---------- rendering helpers ---------- */
+function grid(cols, cells){ return `<div class="grid" style="grid-template-columns:repeat(${cols},34px)">${cells.join('')}</div>`; }
+function cell(txt, cls, attrs){ return `<div class="cell ${cls||''}" ${attrs||''}>${txt}</div>`; }
+
+function positionRoleGrid(ST, highlightGroup){
+  let cells=[];
+  for(let pos=1; pos<=ST.n; pos++) cells.push(cell(pos, 'head'));
+  ST.positions.forEach(p=>{
+    let cls = p.type==='P' ? 'parity' : 'data';
+    if(highlightGroup && highlightGroup.includes(p.pos)) cls+=' hi';
+    let label = p.type==='P' ? 'P'+(Math.log2(p.pos)) : 'D'+p.dIndex;
+    cells.push(cell(label, cls));
+  });
+  return grid(ST.n, cells);
+}
+function valueGrid(positions, codeword, n){
+  let cells=[];
+  for(let pos=1; pos<=n; pos++) cells.push(cell(pos,'head'));
+  positions.forEach(p=>{
+    let cls = p.type==='P' ? 'parity' : 'data';
+    let label = p.type==='P' ? 'P'+(Math.log2(p.pos)) : 'D'+p.dIndex;
+    cells.push(cell(label, cls));
+  });
+  for(let pos=1; pos<=n; pos++){
+    let cls = positions[pos-1].type==='P' ? 'parity' : 'data';
+    cells.push(cell(codeword[pos], cls));
+  }
+  return grid(n, cells);
+}
+
+function matrixGrid(M, opts){
+  opts = opts||{};
+  let rows=M.length, cols=M[0].length;
+  let cells=[];
+  for(let i=0;i<rows;i++){
+    for(let j=0;j<cols;j++){
+      let cls = (opts.dataCols && j<opts.dataCols) ? 'data' : 'parity';
+      if(opts.hiRow===i) cls+=' hi';
+      if(opts.hiCol===j) cls+=' hi';
+      cells.push(cell(M[i][j], cls));
+    }
+  }
+  return grid(cols, cells);
+}
+
+function legend(){
+  return `<div class="legend">
+    <span><span class="swatch" style="background:var(--accent)"></span>data bit</span>
+    <span><span class="swatch" style="background:var(--accent2)"></span>parity bit</span>
+  </div>`;
+}
+function dimBadge(rows, cols){ return `<span class="pill">${rows}\u00d7${cols}</span>`; }
+
+/* ---------- step definitions ---------- */
+const STEPS = [
+  { title:"Determine the number of parity bits", render: s0 },
+  { title:"Identify parity and data positions", render: s1 },
+  { title:"Data \u2192 parity contributions & build P", render: s2 },
+  { title:"Build I and complete G = [I|P]", render: s3 },
+  { title:"Now use the real message: c = m \u00d7 G", render: s4 },
+  { title:"Send it through a noisy channel", render: s5 },
+  { title:"Error-correction capacity", render: s6 },
+  { title:"Build the parity-check matrix H", render: s7 },
+  { title:"Decode: syndrome, locate, correct", render: s8 },
+];
+
+function s0(ST){
+  let m=ST.k, lines=[];
+  for(let rr=1; rr<=ST.r; rr++){
+    let ok = Math.pow(2,rr) >= m+rr+1;
+    lines.push(`r = ${rr}\n2^${rr} = ${Math.pow(2,rr)}\n${Math.pow(2,rr)} \u2265 ${m}+${rr}+1 = ${m+rr+1} ?  ${ok?'YES \u2713':'no \u2717'}`);
+    if(ok) break;
+  }
+  return `
+  <h2><span class="tag">Step 1</span>Determine the number of parity bits</h2>
+  <p>Your input <code>${ST.dataStr}</code> has <b>m = ${ST.k}</b> data bit${ST.k===1?'':'s'}.</p>
+  <p class="why">We need enough parity bits <code>r</code> so that the receiver can not only detect an error, but pin down <i>which</i> of the n = m+r bit positions is wrong &mdash; or confirm there is no error at all. That means r bits of syndrome must be able to represent (m+r+1) distinct outcomes: "no error" plus one outcome per bit position. Hence the condition:</p>
+  <div class="mathblock">2^r \u2265 m + r + 1</div>
+  <p>We test increasing values of r until the condition holds:</p>
+  <div class="mathblock">${lines.join('\n\n')}</div>
+  <div class="result">r = ${ST.r} parity bits required\n\nCodeword length: n = m + r = ${ST.k} + ${ST.r} = ${ST.n}${(ST.k===4&&ST.r===3)?'\n\nThis is exactly the classic Hamming(7,4) code.':''}</div>
+  `;
+}
+
+function s1(ST){
+  return `
+  <h2><span class="tag">Step 2</span>Identify parity and data positions</h2>
+  <p>Parity bits go at positions that are powers of two &mdash; <code>1, 2, 4, 8, ...</code> &mdash; because those positions have exactly one bit set in binary, which lets each parity bit "own" a clean, non-overlapping check. Every other position holds a data bit, filled left to right.</p>
+  <div class="matlabel">position \u2192 role (n = ${ST.n})</div>
+  ${positionRoleGrid(ST)}
+  ${legend()}
+  <p class="why">Parity positions: ${ST.positions.filter(p=>p.type==='P').map(p=>p.pos).join(', ')}. Data positions: ${ST.dataPositions.map(p=>p.pos).join(', ')}. We are only labelling roles here &mdash; no parity value is calculated yet, and no data has been placed yet.</p>
+  `;
+}
+
+function s2(ST){
+  let groupsHtml = ST.groups.map(g=>{
+    let coveredLabels = g.covered.map(pos => 'D'+ST.dataPositions.find(p=>p.pos===pos).dIndex);
+    let binRows = [g.p, ...g.covered].map(p=> `${p} = ${bin(p, ST.n.toString(2).length)}`).join('\n');
+    return `<div class="mathblock">P${g.p} is responsible for one binary digit \u2014 the one worth 2^${g.exp} (that's the digit that makes ${g.p}). It watches every position whose binary form has a 1 in that same spot:\n${binRows}\n\nSo P${g.p} watches over: ${coveredLabels.join(', ')}</div>`;
+  }).join('');
+  let header = 'D\\P\t'+ST.groups.map(g=>'P'+g.p).join('\t');
+  let rows = ST.dataPositions.map((dp,idx)=>`D${dp.dIndex}\t${ST.P[idx].join('\t')}`).join('\n');
+  return `
+  <h2><span class="tag">Step 3</span>Which data bits contribute to which parity bits?</h2>
+  <p class="why">Picture each parity bit as an inspector, and each position as a worker. Every inspector is assigned one binary digit to watch, and only checks in on workers whose position number has a 1 in that digit. Write each position number in binary and it's easy to see who reports to whom.</p>
+  <p class="why">We're not solving for any values here \u2014 just mapping out which data bits are watched by which inspector. No real message is involved yet.</p>
+  ${groupsHtml}
+  <h2 style="margin-top:22px;font-size:15px;">Turning that into a table: the P matrix</h2>
+  <p class="why">One row per data bit, one column per parity bit. A <b>1</b> means "this inspector watches this data bit", a <b>0</b> means it doesn't.</p>
+  <div class="mathblock">${header}\n${rows}</div>
+  <div class="matlabel">P ${dimBadge(ST.k, ST.r)}</div>
+  ${matrixGrid(ST.P,{dataCols:0})}
+  <div class="result warn">Important: these are still just yes/no relationships. No actual parity value has been calculated \u2014 that only happens once a real message shows up, in Step 5.</div>
+  `;
+}
+
+function s3(ST){
+  let chips = ST.P.map((prow,j)=>{
+    let active = ST.basisActive===j ? 'active' : '';
+    return `<div class="basisrow ${active}" data-action="basis" data-idx="${j}">Row ${j+1} \u2014 D${j+1}</div>`;
+  }).join('');
+  let idRow = new Array(ST.k).fill(0).map((_,i)=>i===ST.basisActive?1:0).join('');
+  let pRow = ST.P[ST.basisActive].join('');
+  return `
+  <h2><span class="tag">Step 4</span>Build I and complete G = [I|P]</h2>
+  <p class="why">A matrix's <b>dimensions</b> just mean its shape \u2014 how many rows tall and how many columns wide, written as rows\u00d7columns. We now glue two pieces side by side to make one matrix, G:</p>
+  <p><b>I</b> (identity): one row and one column per data bit, so every data bit passes straight through unchanged. <span class="matlabel" style="display:inline;margin:0;">I</span> ${dimBadge(ST.k, ST.k)}</p>
+  <p><b>P</b>: the contribution table you already built in Step 3 \u2014 nothing new to calculate here. <span class="matlabel" style="display:inline;margin:0;">P</span> ${dimBadge(ST.k, ST.r)}</p>
+  <p>Placed side by side, G keeps the same number of rows (one per data bit) and adds the columns together: ${ST.k}+${ST.r} = ${ST.n} columns. <span class="matlabel" style="display:inline;margin:0;">G</span> ${dimBadge(ST.k, ST.n)}</p>
+  <p class="why">Click a row to see it isn't new math \u2014 it's just that data bit's identity slot glued to its P row from Step 3:</p>
+  ${chips}
+  <p class="hint">Row ${ST.basisActive+1} of G &nbsp;=&nbsp; <code>${idRow}</code> (from I) joined with <code>${pRow}</code> (from P) &nbsp;=&nbsp; <code>${idRow}${pRow}</code></p>
+  <div class="matlabel">G = [ I<sub>${ST.k}</sub> | P ]  (${ST.k}\u00d7${ST.n})</div>
+  ${matrixGrid(ST.G,{dataCols:ST.k, hiRow:ST.basisActive})}
+  ${legend()}
+  `;
+}
+
+function s4(ST){
+  let rows = ST.dataBits.map((b,j)=>`D${j+1}=${b} \u2192 row ${j+1} ${b?'contributes':'is skipped'}`).join('\n');
+  let inter = computeInterleaved(ST.dataBits, ST.n, ST.r);
+  let interParity = ST.groups.map(g=>inter.codeword[g.p]).join('');
+  return `
+  <h2><span class="tag">Step 5</span>Now bring in the real message: c = m \u00d7 G</h2>
+  <p class="why">Only now does your actual data <code>${ST.dataStr}</code> enter the picture. For every data bit that is 1, XOR in that row of G; rows where the data bit is 0 are skipped &mdash; G itself never changed.</p>
+  <div class="mathblock">${rows}\n\nXOR the contributing rows together (mod 2) \u2192 c</div>
+  <div class="result">c (data | parity) = ${ST.c.slice(0,ST.k).join('')} | ${ST.c.slice(ST.k).join('')}\n\nThe parity bits ${ST.c.slice(ST.k).join('')} only exist now &mdash; they're specific to this message, produced entirely by the multiplication.</div>
+  <div class="matlabel">for reference: the classic interleaved Hamming layout</div>
+  ${valueGrid(inter.positions, inter.codeword, ST.n)}
+  <p class="hint">Same relationships, different bit order: the interleaved parity bits here read <code>${interParity}</code>, embedded inside <code>${inter.codeword.slice(1).join('')}</code>. From here on we stick to the systematic <code>[data | parity]</code> form.</p>
+  `;
+}
+
+function s5(ST){
+  let cells = ST.c.map((b,i)=>{
+    let val = b ^ ST.flips[i];
+    let cls = i<ST.k ? 'data' : 'parity';
+    if(ST.flips[i]) cls+=' flip';
+    return cell(val, cls+' click', `data-action="flip" data-idx="${i}"`);
+  });
+  let e = ST.flips;
+  let rVec = ST.c.map((b,i)=>b^ST.flips[i]);
+  return `
+  <h2><span class="tag">Step 6</span>Send c through a noisy channel</h2>
+  <p class="why">Once c leaves the transmitter it travels through a channel that isn't perfectly reliable \u2014 static, interference, anything that can flip a 0 to a 1 or a 1 to a 0 along the way.</p>
+  <p class="why">We describe that damage with an <b>error vector e</b>: a string of 0s and 1s the same length as c. Think of it as a transparent overlay laid on top of c \u2014 wherever e has a <b>1</b>, that bit flips; wherever it has a <b>0</b>, nothing changes.</p>
+  <div class="matlabel">c \u2192 click bits to flip \u2192 r = c \u2295 e</div>
+  ${grid(ST.n, cells)}
+  ${legend()}
+  <div class="mathblock">c = ${ST.c.join('')}\ne = ${e.join('')}\n----${'-'.repeat(ST.n)}\nr = ${rVec.join('')}   (r = c \u2295 e, bit by bit)</div>
+  <p class="hint">That's exactly why XOR is used: XOR with 1 flips a bit, XOR with 0 leaves it alone \u2014 so "c \u2295 e" just means "c, with e's flips applied".</p>
+  <div class="result">Hamming weight of e (number of injected errors) = ${weight(e)}</div>
+  <p class="hint">This weight is known to the simulator because it created e. A real receiver only ever sees r &mdash; it has to work out whether, and where, an error happened. That's what Steps 8&ndash;9 do.</p>
+  `;
+}
+
+function s6(ST){
+  let dmin = 3; // true for the classical single-error-correcting Hamming construction used here
+  let t = Math.floor((dmin-1)/2);
+  let e = ST.flips, w = weight(e);
+  let exA = '1000000', exB = '1000011';
+  let diffCount = exA.split('').filter((ch,i)=>ch!==exB[i]).length;
+  return `
+  <h2><span class="tag">Step 7</span>Error-correction capacity</h2>
+  <p class="why"><b>Weight</b> is the simplest idea here: just a headcount of the 1s in a bit string. <code>0000010</code> has weight 1. <code>0000011</code> has weight 2. No formula, just count.</p>
+  <p class="why"><b>Hamming distance</b> between two codewords is how many positions they differ in \u2014 like counting typos between two words of the same length:</p>
+  <div class="mathblock">A = ${exA}\nB = ${exB}\n           differ at positions 6 and 7\n\ndistance(A, B) = ${diffCount}</div>
+  <p class="why">Now imagine comparing every pair of valid codewords this code can produce, and finding the smallest distance between any two of them. That smallest gap is called <b>d<sub>min</sub></b>. For this Hamming code, d<sub>min</sub> = 3 \u2014 no two valid codewords are ever closer than 3 flips apart.</p>
+  <p class="why">Why that matters: if one bit flips, the result still sits closer to the original codeword than to any other valid one, so the receiver can always find its way back. Two flips, though, can land exactly between two valid codewords \u2014 and then there's no way to be sure which one you meant.</p>
+  <div class="mathblock">t = \u230a(d_min - 1) / 2\u230b = \u230a(3-1)/2\u230b = 1</div>
+  <div class="result">Guaranteed correction: 1 bit\nGuaranteed detection: d_min - 1 = 2 bits\n\n0 errors \u2192 no problem\n1 error  \u2192 detect and correct\n2 errors \u2192 detected, but NOT reliably correctable\n3+       \u2192 beyond this code's guarantees</div>
+  <p class="hint">You currently have ${w} error${w===1?'':'s'} injected (from Step 6). ${w<=1?'That is within this code\u2019s correction capacity.':'That exceeds the correction capacity \u2014 keep this in mind for Step 9.'}</p>
+  `;
+}
+
+function s7(ST){
+  return `
+  <h2><span class="tag">Step 8</span>Build the parity-check matrix H</h2>
+  <p class="why">H is just P turned on its side (transposed), with an identity block attached next to it: <code>H = [P<sup>T</sup> | I<sub>n-k</sub>]</code>. Its whole job is a quick check: multiply any valid codeword by H<sup>T</sup> and the answer should always come out all zeros.</p>
+  <p class="why">H needs n columns \u2014 one per codeword bit, same as G \u2014 and one row per parity bit, since each row is one parity check. That gives ${ST.r} rows and ${ST.n} columns.</p>
+  <div class="matlabel">H = [ P<sup>T</sup> | I<sub>${ST.r}</sub> ]  (${ST.r}\u00d7${ST.n}) ${dimBadge(ST.r, ST.n)}</div>
+  ${matrixGrid(ST.H,{dataCols:ST.k})}
+  ${legend()}
+  <p class="hint">Each column of H works like a fingerprint \u2014 exactly what a single-bit error at that position would produce. That's what makes the next step, comparing against those fingerprints, possible.</p>
+  `;
+}
+
+function s8(ST){
+  let rVec = ST.c.map((b,i)=>b^ST.flips[i]);
+  let S = syndrome(rVec, ST.H);
+  let e = ST.flips, w = weight(e);
+  let isZero = S.every(x=>x===0);
+  let found=-1;
+  if(!isZero){
+    for(let col=0; col<ST.n; col++){
+      let match=true;
+      for(let i=0;i<ST.r;i++){ if(ST.H[i][col]!==S[i]){match=false;break;} }
+      if(match){found=col;break;}
+    }
+  }
+  let corrected = rVec.slice();
+  if(found>=0) corrected[found]^=1;
+  let success = corrected.join('')===ST.c.join('');
+  let resultBlock;
+  if(isZero){
+    resultBlock = `<div class="result">Syndrome S = ${S.join('')} \u2014 all zero.\nThe receiver concludes: no error detected (r is itself a valid codeword).</div>`;
+  } else if(success){
+    resultBlock = `<div class="result">Syndrome S = ${S.join('')} matches column ${found+1} of H \u2192 error located at position ${found+1}.\nFlipping that bit: corrected = ${corrected.join('')}\nRecovered data bits = ${corrected.slice(0,ST.k).join('')}\nCorrection successful \u2014 matches the original codeword.</div>`;
+  } else {
+    resultBlock = `<div class="result bad">Syndrome S = ${S.join('')} points the decoder to position ${found+1}, giving "corrected" = ${corrected.join('')}.\nThat does NOT match the original codeword (${ST.c.join('')}).\n${w} errors were injected, exceeding this code's correction capacity of 1 \u2014 the syndrome cannot reliably distinguish this pattern from a single-bit error elsewhere. This is the known limitation, not a bug.</div>`;
+  }
+  return `
+  <h2><span class="tag">Step 9</span>Decode: syndrome \u2192 locate \u2192 correct</h2>
+  <p class="why">All the receiver has is r. To check for trouble, it multiplies r by H<sup>T</sup> to get a short <b>syndrome</b> \u2014 think of it as a fingerprint of whatever went wrong (or didn't). Then it compares that fingerprint against each column of H, which stores the fingerprint of every possible single-bit error, looking for a match.</p>
+  <div class="mathblock">r  = 1\u00d7${ST.n}\nH^T = ${ST.n}\u00d7${ST.r}\nr\u00d7H^T = 1\u00d7${ST.r}  \u2192 a ${ST.r}-bit syndrome</div>
+  <div class="mathblock">S = ${S.join('')}</div>
+  ${resultBlock}
+  <p class="hint">Change the flips in Step 6 (use Previous) to try 0, 1, or 2+ errors and see how the outcome changes.</p>
+  `;
+}
+
+/* ---------- checkpoints ---------- */
+const RECAPS = [
+  ST=>`In plain terms: with ${ST.k} data bits, ${ST.r} parity bits is the smallest number that gives every bit position (plus "no error") its own unique code. So the codeword ends up ${ST.n} bits long.`,
+  ST=>`In plain terms: positions 1, 2, 4, 8... are reserved for parity because each is a clean power of two. Everything else is a data slot &mdash; but we haven't placed any actual bits yet, just labelled the roles.`,
+  ST=>`In plain terms: this step never touches your real message. It only asks "if this data bit were 1, which parity checks would notice?" &mdash; and records those yes/no answers as the P matrix.`,
+  ST=>`In plain terms: G is a rulebook, not a calculation on your message. Stack the identity matrix next to P and you have a machine that can encode any message of this length, built before your data was ever used.`,
+  ST=>`In plain terms: this is the first time your real data is used. XOR together the rows of G for every 1 in your message, and the parity bits <code>${ST.c.slice(ST.k).join('')}</code> fall out of that multiplication.`,
+  ST=>`In plain terms: the channel is unreliable, so some bits may flip. <code>e</code> is just a map of which ones did. The received vector <code>r = c \u2295 e</code> is all the receiver ever actually sees.`,
+  ST=>`In plain terms: weight = how many 1s are in a string. Distance = how many positions two codewords differ in. Because the closest any two valid codewords ever get is 3 flips apart, one flipped bit still points clearly back to the original \u2014 but two flips can get lost between two valid answers.`,
+  ST=>`In plain terms: H is built from the same P used in G, just transposed and paired with an identity block. Its job is to let the receiver check <code>r \u00b7 H<sup>T</sup></code> without ever seeing the original codeword.`,
+  ST=>`In plain terms: the syndrome is a fingerprint. If it's all zeros, nothing looks wrong. Otherwise, whichever column of H matches the syndrome tells you the exact bit to flip back.`,
+];
+function checkpointHTML(ST){
+  let recap = ST.recap[ST.step];
+  let last = ST.step===STEPS.length-1;
+  return `<div class="checkpoint">
+    <p class="ask">Did you understand this step?</p>
+    <div class="row">
+      <button data-action="understood" ${last?'disabled':''}>Yes, continue \u2192</button>
+      <button class="secondary" data-action="explainmore">No, explain again</button>
+    </div>
+    ${recap ? `<div class="recap">${RECAPS[ST.step](ST)}</div>` : ''}
+  </div>`;
+}
+
+/* ---------- controller ---------- */
+function render(){
+  let s = STEPS[ST.step];
+  document.getElementById('panel').innerHTML = s.render(ST) + checkpointHTML(ST);
+  document.getElementById('fill').style.width = (100*(ST.step+1)/STEPS.length)+'%';
+  document.getElementById('proglabel').textContent = `Step ${ST.step+1} / ${STEPS.length} \u2014 ${s.title}`;
+  document.getElementById('prevBtn').disabled = ST.step===0;
+  document.getElementById('nextBtn').textContent = ST.step===STEPS.length-1 ? 'Finished' : 'Continue \u2192';
+  document.getElementById('nextBtn').disabled = ST.step===STEPS.length-1;
+}
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  let v = document.getElementById('datain').value.trim();
+  let err = document.getElementById('inErr');
+  if(!v){ err.textContent='Enter some binary data first.'; return; }
+  if(!/^[01]+$/.test(v)){ err.textContent='Only 0 and 1 are allowed.'; return; }
+  if(v.length>16){ err.textContent='Keep it to 16 bits or fewer so the matrices stay readable.'; return; }
+  err.textContent='';
+  ST = initState(v);
+  document.getElementById('intro').style.display='none';
+  document.getElementById('wizard').style.display='block';
+  render();
+});
+document.querySelectorAll('[data-ex]').forEach(b=>b.addEventListener('click',()=>{
+  document.getElementById('datain').value = b.getAttribute('data-ex');
+}));
+document.getElementById('prevBtn').addEventListener('click',()=>{ if(ST.step>0){ ST.step--; render(); } });
+document.getElementById('nextBtn').addEventListener('click',()=>{ if(ST.step<STEPS.length-1){ ST.step++; render(); } });
+document.getElementById('restartBtn').addEventListener('click',()=>{
+  ST=null;
+  document.getElementById('wizard').style.display='none';
+  document.getElementById('intro').style.display='block';
+  document.getElementById('datain').value='';
+});
+document.getElementById('panel').addEventListener('click', (ev)=>{
+  let t = ev.target.closest('[data-action]');
+  if(!t) return;
+  let action = t.getAttribute('data-action');
+  if(action==='flip'){
+    let idx = +t.getAttribute('data-idx');
+    ST.flips[idx] = ST.flips[idx]?0:1;
+    render();
+  } else if(action==='basis'){
+    ST.basisActive = +t.getAttribute('data-idx');
+    render();
+  } else if(action==='understood'){
+    if(ST.step<STEPS.length-1){ ST.step++; render(); }
+  } else if(action==='explainmore'){
+    ST.recap[ST.step] = !ST.recap[ST.step];
+    render();
+  }
+});
+</script>
+</body>
+</html>
