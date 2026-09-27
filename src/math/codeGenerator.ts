@@ -1,4 +1,5 @@
 import { identity, transpose } from './gf2';
+import { deriveHammingParams } from './hammingDerivation';
 
 export interface CodeMatrices {
   G: number[][];
@@ -41,46 +42,52 @@ export function buildGH(k: number, n: number, P: number[][]): CodeMatrices {
   return { G, H };
 }
 
+export interface CodePreset extends CodeMatrices {
+  n: number;
+  k: number;
+  r: number;
+  P: number[][];
+}
+
 /**
- * Standard preset Parity submatrices for common Hamming codes.
+ * Named code specifications offered in the Control Station.
+ * `k` is the only real input — n, r and the matrices are derived from it.
  */
-export const HAMMING_PRESETS: Record<string, { n: number; k: number; P: number[][] }> = {
-  '(7,4)': {
-    n: 7,
-    k: 4,
-    // k=4, r=3. 4 rows, 3 cols.
-    // Columns of H are all 7 non-zero 3-bit vectors.
-    P: [
-      [1, 1, 0],
-      [1, 0, 1],
-      [0, 1, 1],
-      [1, 1, 1],
-    ],
+export const CODE_PRESETS: { key: string; label: string; k: number }[] = [
+  { key: '(7,4)', label: '(7, 4) Hamming Code', k: 4 },
+  { key: '(15,11)', label: '(15, 11) Hamming Code', k: 11 },
+  { key: '(3,1)', label: '(3, 1) Repetition Code', k: 1 },
+];
+
+function buildPreset(k: number): CodePreset {
+  const derived = deriveHammingParams(k);
+  return {
+    n: derived.n,
+    k,
+    r: derived.r,
+    P: derived.G.map((row) => row.slice(k)),
+    G: derived.G,
+    H: derived.H,
+  };
+}
+
+/**
+ * Standard preset matrices for common Hamming codes.
+ *
+ * These are DERIVED from deriveHammingParams(k), the same single source of
+ * truth the guided D1–D5 derivation animates — so a preset and the live
+ * derivation can never disagree, and no matrix is stored twice.
+ */
+export const HAMMING_PRESETS: Record<string, CodePreset> = CODE_PRESETS.reduce(
+  (table, preset) => {
+    table[preset.key] = buildPreset(preset.k);
+    return table;
   },
-  '(3,1)': {
-    n: 3,
-    k: 1,
-    // Simple 3-bit triple repetition code (d_min = 3)
-    P: [
-      [1, 1],
-    ],
-  },
-  '(15,11)': {
-    n: 15,
-    k: 11,
-    // k=11, r=4. 11 rows of weight >= 2, 4 cols.
-    P: [
-      [1, 1, 0, 0],
-      [1, 0, 1, 0],
-      [0, 1, 1, 0],
-      [1, 1, 1, 0],
-      [1, 0, 0, 1],
-      [0, 1, 0, 1],
-      [1, 1, 0, 1],
-      [0, 0, 1, 1],
-      [1, 0, 1, 1],
-      [0, 1, 1, 1],
-      [1, 1, 1, 1],
-    ],
-  },
-};
+  {} as Record<string, CodePreset>
+);
+
+/** Maps a preset key such as '(7,4)' back to its message length k. */
+export function presetKeyToK(presetKey: string): number | null {
+  const preset = CODE_PRESETS.find((entry) => entry.key === presetKey);
+  return preset ? preset.k : null;
+}
