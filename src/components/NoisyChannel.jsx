@@ -6,7 +6,7 @@
  * particles. Tinted volume corridor with floor markings.
  */
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
@@ -69,6 +69,30 @@ function ChannelParticles({ count = 60 }) {
 export default function NoisyChannel() {
   const currentStage = useLabStore((s) => s.currentStage);
   const transmit = useLabStore((s) => s.transmitToReceiver);
+  const role = useLabStore((s) => s.role);
+  const n = useLabStore((s) => s.n);
+  const injectErrorAtPosition = useLabStore((s) => s.injectErrorAtPosition);
+
+  // Keyboard accessibility for injecting noise
+  const handleBitClick = useCallback((pos) => {
+    if (role !== 'noise_controller') return;
+    if (currentStage === 'in-flight') {
+      injectErrorAtPosition(pos);
+    }
+  }, [role, currentStage, injectErrorAtPosition]);
+
+  useEffect(() => {
+    const onKeyDown = (eEvent) => {
+      if (role !== 'noise_controller') return;
+      if (currentStage !== 'in-flight') return;
+      const keyMap = { '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9 };
+      if (keyMap[eEvent.key] !== undefined && keyMap[eEvent.key] <= n) {
+        handleBitClick(keyMap[eEvent.key]);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [role, currentStage, n, handleBitClick]);
 
   return (
     <group position={[0, 0, 0]}>
@@ -120,18 +144,23 @@ export default function NoisyChannel() {
       {currentStage === 'in-flight' && (
         <group position={[0, 1.5, 1.5]}>
           <mesh
-            onClick={(e) => { e.stopPropagation(); transmit(); }}
-            onPointerOver={() => document.body.style.cursor='pointer'}
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              if (role === 'noise_controller') transmit(); 
+            }}
+            onPointerOver={() => {
+              if (role === 'noise_controller') document.body.style.cursor='pointer';
+            }}
             onPointerOut={() => document.body.style.cursor='default'}
           >
             <boxGeometry args={[3.0, 0.6, 0.2]} />
-            <meshStandardMaterial color="#00e676" emissive="#00e676" emissiveIntensity={0.3} />
+            <meshStandardMaterial color={role === 'noise_controller' ? "#00e676" : "#555"} emissive={role === 'noise_controller' ? "#00e676" : "#222"} emissiveIntensity={0.3} />
           </mesh>
-          <Text position={[0, 0, 0.11]} fontSize={0.2} color="#000" fontWeight="bold">
+          <Text position={[0, 0, 0.11]} fontSize={0.2} color={role === 'noise_controller' ? "#000" : "#888"} fontWeight="bold">
             SEND TO RECEIVER →
           </Text>
-          <Text position={[0, -0.6, 0]} fontSize={0.16} color="#fff">
-            Click packet bits to inject noise!
+          <Text position={[0, -0.6, 0]} fontSize={0.16} color={role === 'noise_controller' ? "#fff" : "#777"}>
+            {role === 'noise_controller' ? 'Click packet bits to inject noise!' : 'Waiting for Noise Controller...'}
           </Text>
         </group>
       )}
