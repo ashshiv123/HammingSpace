@@ -1,14 +1,3 @@
-/**
- * Lab3D.jsx — React Three Fiber Canvas + Scene Root
- *
- * Renders:
- *   - Canvas with lighting, ground, and stars
- *   - Four zones laid out in one continuous space
- *   - OrbitControls for free exploration
- *   - CameraController for guided zone transitions
- *   - HUD overlays: PipelineHUD (top) + ZoneNav (bottom)
- */
-
 import React, { useRef, useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
@@ -20,6 +9,8 @@ import HammingSpaceChamber from './HammingSpaceChamber';
 import CameraController from './CameraController';
 import PipelineHUD from './PipelineHUD';
 import ZoneNav from './ZoneNav';
+import ModeSelector from './ModeSelector';
+import CustomLabHUD from './CustomLabHUD';
 
 function GroundPlane() {
   return (
@@ -102,6 +93,8 @@ export default function Lab3D() {
     <div style={{ width: '100vw', height: '100vh', position: 'relative', background: '#0a0a14' }}>
       <PipelineHUD />
       <ZoneNav activeZone={activeZone} onNavigate={handleNavigate} />
+      <ModeSelector />
+      <CustomLabHUD />
 
       <Canvas
         shadows

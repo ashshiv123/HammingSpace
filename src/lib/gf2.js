@@ -123,3 +123,12 @@ export function minDistance(codewords) {
   if (!isFinite(dMin)) throw new Error('minDistance: could not compute d_min');
   return { dMin, t: Math.floor((dMin - 1) / 2) };
 }
+
+/** Validates that G H^T = 0 */
+export function validateGH(G, H) {
+  for (const rG of G) {
+    const s = syndrome(rG, H);
+    if (!s.every(b => b === 0)) return false;
+  }
+  return true;
+}

@@ -134,7 +134,7 @@ function BitSwitch({ index, bitValue, onToggle }) {
 // -----------------------------------------------------------------------------
 // Component: Message Console Desk (Task 1)
 // -----------------------------------------------------------------------------
-function MessageConsole({ m, onToggle }) {
+function MessageConsole({ m, k, onToggle }) {
   return (
     <group position={[-2.8, 0, 1.8]}>
       {/* Console Base / Table */}
@@ -157,7 +157,7 @@ function MessageConsole({ m, onToggle }) {
         fontWeight="bold"
         anchorX="center"
       >
-        MESSAGE CONSOLE (k = 4)
+        {`MESSAGE CONSOLE (k = ${k || m.length})`}
       </Text>
       <Text
         position={[0, 1.34, -0.4]}
@@ -182,10 +182,12 @@ function MessageConsole({ m, onToggle }) {
 // -----------------------------------------------------------------------------
 // Component: Generator Matrix Rig (Task 2)
 // -----------------------------------------------------------------------------
-function GeneratorMatrixRig({ G, m, animOffset }) {
+function GeneratorMatrixRig({ G, m, animOffset, mode }) {
   const k = G.length;
   const n = G[0].length;
   const parityStart = k; // 4 for (7,4)
+
+  const showJargon = mode !== 'beginner';
 
   return (
     <group position={[1.2, 0, -1.2]}>
@@ -201,36 +203,42 @@ function GeneratorMatrixRig({ G, m, animOffset }) {
       </mesh>
 
       {/* Rig Header */}
-      <Text position={[0, 4.4, 0]} fontSize={0.36} color={PALETTE.identity} fontWeight="bold" anchorX="center">
-        GENERATOR MATRIX G = [ I₄ | P ]
-      </Text>
+      {showJargon && (
+        <Text position={[0, 4.4, 0]} fontSize={0.36} color={PALETTE.identity} fontWeight="bold" anchorX="center">
+          GENERATOR MATRIX G = [ I_{k} | P ]
+        </Text>
+      )}
 
       {/* Identity vs Parity Header Dividers */}
-      <group position={[-1.2, 3.9, 0]}>
-        <Text fontSize={0.2} color={PALETTE.identity} fontWeight="bold" anchorX="center">
-          IDENTITY BLOCK [ I₄ ]
-        </Text>
-        <Text position={[0, -0.22, 0]} fontSize={0.11} color={PALETTE.textMuted} anchorX="center">
-          Message bits pass through
-        </Text>
-      </group>
+      {showJargon && (
+        <>
+          <group position={[-1.2, 3.9, 0]}>
+            <Text fontSize={0.2} color={PALETTE.identity} fontWeight="bold" anchorX="center">
+              IDENTITY BLOCK [ I_{k} ]
+            </Text>
+            <Text position={[0, -0.22, 0]} fontSize={0.11} color={PALETTE.textMuted} anchorX="center">
+              Message bits pass through
+            </Text>
+          </group>
 
-      <group position={[1.8, 3.9, 0]}>
-        <Text fontSize={0.2} color={PALETTE.parity} fontWeight="bold" anchorX="center">
-          PARITY BLOCK [ P ]
-        </Text>
-        <Text position={[0, -0.22, 0]} fontSize={0.11} color={PALETTE.textMuted} anchorX="center">
-          Computed redundancy
-        </Text>
-      </group>
+          <group position={[1.8, 3.9, 0]}>
+            <Text fontSize={0.2} color={PALETTE.parity} fontWeight="bold" anchorX="center">
+              PARITY BLOCK [ P ]
+            </Text>
+            <Text position={[0, -0.22, 0]} fontSize={0.11} color={PALETTE.textMuted} anchorX="center">
+              Computed redundancy
+            </Text>
+          </group>
+        </>
+      )}
 
-      {/* Vertical Seam / Divider Bar between Column 3 and 4 */}
-      <mesh position={[0.3, 2.2, 0.05]}>
+      {/* Vertical Seam / Divider Bar between Identity and Parity */}
+      <mesh position={[(parityStart - 3.5) * 0.78, 2.2, 0.05]}>
         <boxGeometry args={[0.08, 3.2, 0.15]} />
         <meshStandardMaterial color={PALETTE.seamCollar} emissive={PALETTE.seamCollar} emissiveIntensity={0.4} />
       </mesh>
 
-      {/* Render the 4 Rows of G as distinct 3D rack objects */}
+      {/* Render the rows of G as distinct 3D rack objects */}
       {G.map((row, rIdx) => {
         const isActive = m[rIdx] === 1;
         // Travel offset during animation: active rows move forward towards assembly
@@ -240,7 +248,7 @@ function GeneratorMatrixRig({ G, m, animOffset }) {
         return (
           <group
             key={rIdx}
-            position={[0, 3.3 - rIdx * 0.75 + travelY, travelZ]}
+            position={[0, 3.3 - rIdx * (3 / Math.max(k, 4)) + travelY, travelZ]}
           >
             {/* Row Carrier Bar */}
             <mesh position={[0, 0, 0]}>
@@ -254,14 +262,16 @@ function GeneratorMatrixRig({ G, m, animOffset }) {
             </mesh>
 
             {/* Row Tag Label */}
-            <Text position={[-3.3, 0, 0.1]} fontSize={0.16} color={isActive ? PALETTE.identity : PALETTE.textMuted}>
-              {`Row ${rIdx + 1} (m[${rIdx}]=${m[rIdx]})`}
-            </Text>
+            {showJargon && (
+              <Text position={[-3.3, 0, 0.1]} fontSize={0.16} color={isActive ? PALETTE.identity : PALETTE.textMuted}>
+                {`Row ${rIdx + 1} (m[${rIdx}]=${m[rIdx]})`}
+              </Text>
+            )}
 
-            {/* Row Nodes (n=7 columns) */}
+            {/* Row Nodes (n columns) */}
             {row.map((val, cIdx) => {
               const isIdentity = cIdx < parityStart;
-              const colX = (cIdx - 3) * 0.78 + (isIdentity ? -0.1 : 0.2);
+              const colX = (cIdx - n/2 + 0.5) * 0.78 + (isIdentity ? -0.1 : 0.2);
               const nodeLit = isActive && val === 1;
 
               return (
@@ -525,6 +535,7 @@ function EncodeSendButton({ onTrigger, disabled, isEncoding }) {
 export default function TransmitterStation() {
   const m = useLabStore((s) => s.m);
   const G = useLabStore((s) => s.G);
+  const mode = useLabStore((s) => s.mode);
   const setMessageBit = useLabStore((s) => s.setMessageBit);
   const encodeAction = useLabStore((s) => s.encode);
   const setStage = useLabStore((s) => s.setStage);
@@ -570,7 +581,8 @@ export default function TransmitterStation() {
       // Find columns where multiple active rows overlap to highlight GF(2) rule
       const activeRows = G.filter((_, idx) => m[idx] === 1);
       const overlaps = [];
-      for (let col = 0; col < 7; col++) {
+      const n = G[0].length;
+      for (let col = 0; col < n; col++) {
         const ones = activeRows.filter((row) => row[col] === 1).length;
         if (ones > 1) overlaps.push(`col ${col + 1} (${ones} ones → ${ones % 2})`);
       }
@@ -609,6 +621,8 @@ export default function TransmitterStation() {
     }
   });
 
+  const k = G.length;
+
   return (
     <group position={[-12, 0, 0]}>
       {/* Zone Floor Plate */}
@@ -631,11 +645,11 @@ export default function TransmitterStation() {
         Construction & Redundancy Inoculation
       </Text>
 
-      {/* Task 1: Message Console with k=4 physical switches */}
-      <MessageConsole m={m} onToggle={handleToggleBit} />
+      {/* Task 1: Message Console with k physical switches */}
+      <MessageConsole m={m} k={k} onToggle={handleToggleBit} />
 
       {/* Task 2 & 3: Generator Matrix Rig */}
-      <GeneratorMatrixRig G={G} m={m} animOffset={rowAnimOffset} />
+      <GeneratorMatrixRig G={G} m={m} animOffset={rowAnimOffset} mode={mode} />
 
       {/* Task 3 & 4: Codeword Assembly & Launch Animation */}
       <CodewordAssembly

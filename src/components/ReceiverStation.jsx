@@ -138,6 +138,9 @@ export default function ReceiverStation() {
 
   const isActiveRender = ['received', 'decoded', 'corrected'].includes(currentStage);
   const vectorToRender = (rxState === 'correcting' || rxState === 'done') ? corrected : r;
+  
+  const mode = useLabStore((s) => s.mode);
+  const showJargon = mode !== 'beginner';
 
   return (
     <group position={[12, 0, 0]}>
@@ -166,55 +169,58 @@ export default function ReceiverStation() {
       )}
 
       {/* Parity Check Matrix H rig */}
-      <group position={[0, 1.2, -1.5]}>
-        <mesh position={[0, 0, -0.2]}>
-          <boxGeometry args={[4.8, 2.2, 0.1]} />
-          <meshStandardMaterial color="#263238" />
-        </mesh>
-        <Text position={[0, 1.3, 0]} fontSize={0.25} color={ACCENT_COLOR} fontWeight="bold">
-          PARITY CHECK MATRIX (H)
-        </Text>
-        
-        {/* H Columns */}
-        {H && H[0] && H[0].map((_, cIdx) => {
-          const colX = (cIdx - 3) * 0.55;
-          const isSweepingMatch = (rxState === 'sweeping' || rxState === 'matched') && sweepCol === cIdx;
+      {showJargon && (
+        <group position={[0, 1.2, -1.5]}>
+          <mesh position={[0, 0, -0.2]}>
+            <boxGeometry args={[4.8, 2.2, 0.1]} />
+            <meshStandardMaterial color="#263238" />
+          </mesh>
+          <Text position={[0, 1.3, 0]} fontSize={0.25} color={ACCENT_COLOR} fontWeight="bold">
+            PARITY CHECK MATRIX (H)
+          </Text>
           
-          return (
-            <group key={cIdx} position={[colX, 0, 0]}>
-              {/* Highlight Box */}
-              {isSweepingMatch && (
-                <mesh position={[0, 0, -0.1]}>
-                  <boxGeometry args={[0.45, 1.8, 0.15]} />
-                  <meshStandardMaterial color={rxState === 'matched' ? '#00e676' : '#ff9800'} emissive={rxState === 'matched' ? '#00e676' : '#ff9800'} emissiveIntensity={0.4} />
-                </mesh>
-              )}
-              
-              {/* Column Label */}
-              <Text position={[0, 0.9, 0]} fontSize={0.14} color="#b0bec5">c{cIdx + 1}</Text>
-              
-              {/* Column Bits */}
-              {H.map((row, rIdx) => {
-                const isActiveRow = rxState === 'scanning' && scanRow === rIdx;
-                const isLit = isActiveRow && row[cIdx] === 1;
-                return (
-                  <group key={rIdx} position={[0, 0.4 - rIdx * 0.4, 0]}>
-                    <mesh>
-                      <sphereGeometry args={[0.12, 16, 16]} />
-                      <meshStandardMaterial 
-                        color={isLit ? H_NODE_COOL : H_NODE_DIM} 
-                        emissive={isLit ? H_NODE_COOL : '#000'}
-                        emissiveIntensity={isLit ? 0.8 : 0.1}
-                      />
-                    </mesh>
-                    <Text position={[0.2, 0, 0]} fontSize={0.12} color="#fff">{row[cIdx]}</Text>
-                  </group>
-                );
-              })}
-            </group>
-          );
-        })}
-      </group>
+          {/* H Columns */}
+          {H && H[0] && H[0].map((_, cIdx) => {
+            const n = H[0].length;
+            const colX = (cIdx - n/2 + 0.5) * 0.55;
+            const isSweepingMatch = (rxState === 'sweeping' || rxState === 'matched') && sweepCol === cIdx;
+            
+            return (
+              <group key={cIdx} position={[colX, 0, 0]}>
+                {/* Highlight Box */}
+                {isSweepingMatch && (
+                  <mesh position={[0, 0, -0.1]}>
+                    <boxGeometry args={[0.45, 1.8, 0.15]} />
+                    <meshStandardMaterial color={rxState === 'matched' ? '#00e676' : '#ff9800'} emissive={rxState === 'matched' ? '#00e676' : '#ff9800'} emissiveIntensity={0.4} />
+                  </mesh>
+                )}
+                
+                {/* Column Label */}
+                <Text position={[0, 0.9, 0]} fontSize={0.14} color="#b0bec5">c{cIdx + 1}</Text>
+                
+                {/* Column Bits */}
+                {H.map((row, rIdx) => {
+                  const isActiveRow = rxState === 'scanning' && scanRow === rIdx;
+                  const isLit = isActiveRow && row[cIdx] === 1;
+                  return (
+                    <group key={rIdx} position={[0, 0.4 - rIdx * 0.4, 0]}>
+                      <mesh>
+                        <sphereGeometry args={[0.12, 16, 16]} />
+                        <meshStandardMaterial 
+                          color={isLit ? H_NODE_COOL : H_NODE_DIM} 
+                          emissive={isLit ? H_NODE_COOL : '#000'}
+                          emissiveIntensity={isLit ? 0.8 : 0.1}
+                        />
+                      </mesh>
+                      <Text position={[0.2, 0, 0]} fontSize={0.12} color="#fff">{row[cIdx]}</Text>
+                    </group>
+                  );
+                })}
+              </group>
+            );
+          })}
+        </group>
+      )}
 
       {/* Syndrome Console */}
       <group position={[3.5, 1.5, -1.5]}>
@@ -222,12 +228,15 @@ export default function ReceiverStation() {
           <boxGeometry args={[1.5, 2.2, 0.1]} />
           <meshStandardMaterial color="#37474f" />
         </mesh>
-        <Text position={[0, 1.3, 0]} fontSize={0.2} color="#81d4fa" fontWeight="bold">
-          SYNDROME (S)
-        </Text>
         
-        {[0, 1, 2].map((rIdx) => {
-          const val = S_store ? S_store[rIdx] : 0;
+        {showJargon && (
+          <Text position={[0, 1.3, 0]} fontSize={0.2} color="#81d4fa" fontWeight="bold">
+            SYNDROME (S)
+          </Text>
+        )}
+        
+        {S_store && S_store.map((_, rIdx) => {
+          const val = S_store[rIdx];
           const showVal = scanRow >= rIdx || rxState === 'sweeping' || rxState === 'matched' || rxState === 'correcting' || rxState === 'done';
           const lit = showVal && val === 1;
           
@@ -259,10 +268,10 @@ export default function ReceiverStation() {
       </group>
 
       {/* Match Line (Laser) */}
-      {rxState === 'matched' && errorPosition !== null && (
+      {showJargon && rxState === 'matched' && errorPosition !== null && (
          <Line 
            points={[
-             [(sweepCol - 3) * 0.55, 1.2, -1.4],
+             [(sweepCol - H[0].length/2 + 0.5) * 0.55, 1.2, -1.4],
              [-3 + (errorPosition - 1 - 3) * 0.7, 0.75, 0]
            ]} 
            color="#00e676" 
