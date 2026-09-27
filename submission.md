@@ -31,6 +31,8 @@ A browser-based 3D digital communication lab (React + Three.js) with:
 5. **Dynamic Lab System**:
    - **Mode System**: 5 distinct learning modes (Beginner, Guided Teaching, Free Experimentation, Custom Code, Capacity Test) that adapt the UI complexity and jargon visibility.
    - **Custom (n,k) Editor**: A realtime editor allowing the user to resize $n$ and $k$, input a custom Parity matrix, validate it, and instantly reshape the entire 3D lab environment (switches, $G$ rows, $H$ columns, and 3D constellation).
+6. **Educational Theory Landing Page**:
+   - Comprehensive interactive documentation explaining the geometry and algebra of Hamming codes with animated visual diagrams.
 
 ### Core Features
 
@@ -45,6 +47,7 @@ A browser-based 3D digital communication lab (React + Three.js) with:
 - **Hamming Space Constellation** — literal spatial mapping of all valid codewords and error vectors with visible $t$ halos
 - **Custom (n,k) Editor** — reshape the entire 3D lab by inputting custom code parameters
 - **GF(2) Math Engine** — pure modular implementation of encode, syndrome, and table correction
+- **Educational Theory Landing Page** — scrollspy navigation, side-by-side SVG diagrams for mathematical concepts, and an animated glassmorphic background
 
 ### Technical Architecture
 
@@ -64,6 +67,7 @@ Single-page React 18 + Vite 5 application.
 - **@react-three/drei 9.122** — 3D helpers (Text, OrbitControls, Stars, Line)
 - **Zustand 5** — global state management
 - **Vitest 1.6** — unit testing framework
+- **react-router-dom** — client-side routing for the application
 
 ### Innovation / Uniqueness
 
