@@ -11,9 +11,6 @@ import PipelineHUD from './PipelineHUD';
 import ZoneNav from './ZoneNav';
 import ModeSelector from './ModeSelector';
 import CustomLabHUD from './CustomLabHUD';
-import RoleToggle from './RoleToggle';
-import SessionLogHUD from './SessionLogHUD';
-import AIExplainPanel from './AIExplainPanel';
 
 function GroundPlane() {
   return (
@@ -98,9 +95,6 @@ export default function Lab3D() {
       <ZoneNav activeZone={activeZone} onNavigate={handleNavigate} />
       <ModeSelector />
       <CustomLabHUD />
-      <RoleToggle />
-      <SessionLogHUD />
-      <AIExplainPanel />
 
       <Canvas
         shadows

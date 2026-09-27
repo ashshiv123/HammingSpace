@@ -16,8 +16,8 @@ export default function ModeSelector() {
   return (
     <div style={{
       position: 'absolute',
-      top: '15px',
-      right: '160px',
+      bottom: '15px',
+      right: '15px',
       zIndex: 10,
       background: 'rgba(20, 20, 30, 0.85)',
       padding: '12px 16px',

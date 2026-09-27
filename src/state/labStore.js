@@ -142,34 +142,7 @@ export const useLabStore = create((set, get) => {
       });
     },
 
-    setMode: (newMode) => {
-      // modes: 'beginner', 'guided', 'free', 'custom', 'capacity'
-      set({ mode: newMode });
-    },
-
-    setCustomG: (newG) => {
-      try {
-        const sys = buildCodeSystem(newG);
-        const k = newG.length;
-        const n = newG[0].length;
-        set({
-          n, k,
-          G: newG,
-          H: sys.H,
-          dMin: sys.dMin,
-          t: sys.t,
-          _syndromeTable: sys.syndromeTable,
-          _codewords: sys.codewords,
-          m: zeroMsg(k), c: zeroVec(n), e: zeroVec(n), r: zeroVec(n),
-          S: [], corrected: zeroVec(n), errorPosition: null, correctable: true,
-          verdict: 'idle', currentStage: 'compose', sessionEvents: [],
-        });
-        return true;
-      } catch (err) {
-        console.error("Invalid custom code:", err);
-        return false;
-      }
-    }
+    setMode: (newMode) => set({ mode: newMode }),
   };
 });
 

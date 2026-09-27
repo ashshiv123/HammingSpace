@@ -312,7 +312,7 @@ function GeneratorMatrixRig({ G, m, animOffset, mode }) {
 // -----------------------------------------------------------------------------
 // Component: GF(2) Fuse Micro-Animation & Codeword Assembly (Task 3 & 4)
 // -----------------------------------------------------------------------------
-function CodewordAssembly({ animState, codeword, launchProgress, role }) {
+function CodewordAssembly({ animState, codeword, launchProgress }) {
   const currentStage = useLabStore((s) => s.currentStage);
   const injectErrorAtPosition = useLabStore((s) => s.injectErrorAtPosition);
   const e = useLabStore((s) => s.e);
@@ -382,7 +382,7 @@ function CodewordAssembly({ animState, codeword, launchProgress, role }) {
           <meshStandardMaterial color="#555" />
         </mesh>
 
-        {/* Prominent Visual Seam Collar between message and parity */}
+        {/* Prominent Visual Seam Collar between bit 3 (message) and bit 4 (parity) */}
         <group position={[0.35, 0, 0]}>
           <mesh rotation={[0, 0, Math.PI / 2]}>
             <cylinderGeometry args={[0.26, 0.26, 0.12, 16]} />
@@ -403,7 +403,7 @@ function CodewordAssembly({ animState, codeword, launchProgress, role }) {
           const nodeX = (idx - 3) * 0.7;
           const isFlipped = e[idx] === 1;
           const nodeRot = isFlipped ? [Math.PI / 3, Math.PI / 4, 0] : [0, 0, 0];
-          const canInject = currentStage === 'in-flight' && role === 'noise_controller';
+          const canInject = currentStage === 'in-flight';
 
           return (
             <group key={idx} position={[nodeX, 0, 0]}>
@@ -536,7 +536,6 @@ export default function TransmitterStation() {
   const m = useLabStore((s) => s.m);
   const G = useLabStore((s) => s.G);
   const mode = useLabStore((s) => s.mode);
-  const role = useLabStore((s) => s.role);
   const setMessageBit = useLabStore((s) => s.setMessageBit);
   const encodeAction = useLabStore((s) => s.encode);
   const setStage = useLabStore((s) => s.setStage);
@@ -551,11 +550,9 @@ export default function TransmitterStation() {
 
   // Computed codeword for visual preview
   const computedCodeword = useMemo(() => gf2Encode(m, G), [m, G]);
-  const k = G.length;
 
   // Handle message bit toggle
-  const handleToggleBit = useCallback((index) => {
-    if (role !== 'encoder') return; // Enforce role
+  const handleToggleBit = (index) => {
     // If currently encoding/launching, reset to compose
     if (animState.stage !== 'idle') {
       setAnimState({ stage: 'idle', fuseColText: '' });
@@ -563,24 +560,10 @@ export default function TransmitterStation() {
       setLaunchProgress(0);
     }
     setMessageBit(index);
-  }, [role, animState.stage, setMessageBit]);
-
-  // Keyboard accessibility for toggle bits
-  useEffect(() => {
-    const onKeyDown = (e) => {
-      if (role !== 'encoder') return;
-      const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8 };
-      if (keyMap[e.key] !== undefined && keyMap[e.key] < k) {
-        handleToggleBit(keyMap[e.key]);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [role, k, handleToggleBit]);
+  };
 
   // Trigger the full "Encode & Send" animation pipeline
   const handleEncodeAndSend = () => {
-    if (role !== 'encoder') return; // Enforce role
     if (animState.stage !== 'idle' && animState.stage !== 'assembled') return;
 
     // Sub-step 1: G rows activate and glow
@@ -638,6 +621,8 @@ export default function TransmitterStation() {
     }
   });
 
+  const k = G.length;
+
   return (
     <group position={[-12, 0, 0]}>
       {/* Zone Floor Plate */}
@@ -671,7 +656,6 @@ export default function TransmitterStation() {
         animState={animState}
         codeword={computedCodeword}
         launchProgress={launchProgress}
-        role={role}
       />
 
       {/* Task 4: Physical "Encode & Send" Control Button */}
