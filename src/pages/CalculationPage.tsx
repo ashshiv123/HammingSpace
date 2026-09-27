@@ -18,6 +18,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { useSimulationStore } from '../store/simulationStore';
+import { CalculationNarrative } from './CalculationNarrative';
 
 export interface CalculationPageProps {
   onBackToLab: () => void;
@@ -29,10 +30,14 @@ export const CalculationPage: React.FC<CalculationPageProps> = ({ onBackToLab })
     k,
     G,
     H,
+    P,
+    dMin,
+    stage,
     message,
     toggleMessageBit,
     codeword,
     receivedVector,
+    errorVector,
     syndrome,
     errorPositions,
     syndromeTable,
@@ -317,6 +322,13 @@ export const CalculationPage: React.FC<CalculationPageProps> = ({ onBackToLab })
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6 pb-24">
+        <CalculationNarrative
+          n={n} k={k} r={r} message={message} P={P} G={G} H={H}
+          codeword={fullCalculatedCodeword} receivedVector={receivedVector}
+          errorVector={errorVector} dMin={dMin}
+          syndromeTable={syndromeTable} stage={stage}
+          onOpenSyndrome={() => { setActiveTab('syndrome'); setCurrentSyndromeBitIndex(0); setIsPlaying(false); }}
+        />
         {activeTab === 'encoding' ? (
           <>
             {/* ========================================================= */}
