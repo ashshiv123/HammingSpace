@@ -20,5 +20,7 @@ Files planned for this feature:
 ## Status
 
 - P0 audit complete.
-- P1 pending.
-- No matrix mismatch assessed yet.
+- P1 complete: reference-derived engine and contract tests added.
+- Engine matches the mounted app for the standard `(7,4)` and `(15,11)` matrices.
+- No matrix mismatch found.
+- P2 pending.
