@@ -502,6 +502,12 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
         lessonStep: 1,
         cameraFocus: 'tx',
       });
+      setTimeout(() => {
+        const current = get();
+        if (current.lessonOpen && current.lessonPhase === 'encoding') {
+          current.setCameraFocus('display');
+        }
+      }, 900);
       return;
     }
     get().startEncodingAnimation();
