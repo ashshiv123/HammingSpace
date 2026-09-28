@@ -1,0 +1,76 @@
+# HammingSpace
+
+### Problem Statement Fit
+
+We selected the problem statement focused on Interactive STEM Education and visualizing abstract engineering concepts. HammingSpace addresses the challenge of teaching error-correcting codes, especially Hamming codes, in a way that is intuitive and visual. Traditional learning relies on dense binary math and matrix equations, which can be difficult for students to understand. Our project turns those concepts into an interactive simulation where users can encode messages, introduce bit errors, and watch syndrome decoding and correction happen in real time.
+
+### Target Users
+
+- Undergraduate and graduate students in computer science, electrical engineering, and telecommunications
+- Educators and professors who need a visual teaching aid for coding theory
+- Self-learners and engineers who want to understand digital error correction more intuitively
+
+The main pain points addressed are difficulty visualizing parity checks, confusion around syndrome decoding, and the lack of clear connections between theory and practical data transmission.
+
+### What We Built
+
+During the event, we built an interactive web-based 3D laboratory and 2D math visualizer for understanding Hamming codes. The project includes:
+- a 3D research lab environment
+- live codeword generation and transmission flow
+- simulated channel noise and bit-flipping
+- real-time syndrome calculation
+- guided educational steps explaining the error-correction process
+
+### Core Features
+
+- Interactive message encoding and transmission flow
+- Hamming code generation using systematic parity logic
+- Bit-flip noise injection in the communication channel
+- Live syndrome calculation and error localization
+- Single-bit error correction and recovery visualization
+- 3D/2D switching between immersive lab and mathematical view
+- Guided educational lesson flow for step-by-step learning
+
+### Technical Architecture
+
+HammingSpace is built as a React-based single-page web app with a modular structure. The system separates the mathematical engine from the visual interface so that all calculations and scene updates remain synchronized. The front end uses a 3D rendering layer for the lab environment, while a pure math engine handles GF(2) operations, parity generation, and syndrome decoding. State is managed centrally so that user input updates the transmitter, channel, and receiver consistently.
+
+### Tech Stack
+
+- React
+- TypeScript
+- Vite
+- Three.js / React Three Fiber
+- Zustand
+- Tailwind CSS
+- Framer Motion
+- KaTeX
+- Vitest / Playwright
+
+### Innovation / Uniqueness
+
+The project stands out by making abstract error-correcting code concepts physically visible. Instead of showing only equations, HammingSpace demonstrates parity generation and syndrome matching through animated visual flows, making the logic behind Hamming codes easier to understand. The combination of 3D exploration and mathematical explanation creates a unique learning experience that connects theory with intuition.
+
+### Demo Instructions
+
+1. Install dependencies with npm install
+2. Start the app with npm run dev
+3. Open the local Vite URL in the browser
+4. Toggle message bits and generate a codeword
+5. Inject channel noise to simulate a transmission error
+6. Observe the syndrome output and correction process
+7. Switch between 3D and 2D views to inspect the mathematics behind the algorithm
+
+### Known Limitations
+
+- Current focus is on binary linear block codes such as Hamming and repetition codes
+- Best experience is on desktop browsers with WebGL support
+- The project is primarily educational and not yet a full production-grade simulation platform
+
+### Future Work
+
+- Add more code families such as BCH and LDPC codes
+- Improve mobile support and accessibility
+- Add more guided lessons and interactive challenges
+- Expand the app with deeper analytics and classroom-ready features
+- Explore advanced visualization modes for more complex coding theory concepts
