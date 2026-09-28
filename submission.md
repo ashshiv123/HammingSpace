@@ -41,8 +41,6 @@ A browser-based 3D digital communication lab (React + Three.js) with:
 9. **Scene recovery and type checking**:
    - The WebGL scene is isolated behind a restartable error boundary, so lesson controls remain available if a scene component fails to render.
    - TypeScript checks now run alongside the existing test and production build commands.
-10. **Progressive Layout and Reveal**:
-    - The transmitter station layout neatly parks the codeword tray on a separate plinth without clipping the laptop. The codeword is revealed progressively (data bits drop in first, then parity bits sequence in) instead of instantly snapping into existence.
 
 ### Core Features
 
@@ -61,7 +59,6 @@ A browser-based 3D digital communication lab (React + Three.js) with:
 - **Automatic Encoding Walkthrough** — sends the live message from the transmitter to a step-by-step explanation on the back-wall display, with automatic camera focus and playback driven by the existing GF(2) calculation steps
 - **Guided Lesson Overlay** — nine paced steps with recap checkpoints, skip/restart controls, live matrices, real channel errors, and an auto-open toggle
 - **Scene Recovery** — a compact restart control replaces a blank page if the WebGL scene throws
-- **Progressive Codeword Reveal** — the codeword is built progressively on the tray after calculation, rather than instantly appearing
 
 ### Technical Architecture
 

@@ -114,32 +114,15 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
   const bitSpacing = Math.min(0.31, 3.28 / Math.max(visibleVector.length, 1));
   const firstBitX = -((visibleVector.length - 1) * bitSpacing) / 2;
 
-  const laptopRef = useRef<THREE.Group>(null);
-  useFrame(() => {
-    const trayRef = (window as any).__devTrayRef;
-    if (laptopRef.current && trayRef && trayRef.current) {
-      const box1 = new THREE.Box3().setFromObject(laptopRef.current);
-      const box2 = new THREE.Box3().setFromObject(trayRef.current);
-      // Reduce the boxes slightly to avoid false positives from anti-aliasing / tight margins
-      box1.expandByScalar(-0.01);
-      box2.expandByScalar(-0.01);
-      if (box1.intersectsBox(box2)) {
-        console.warn("DEV CHECK: Transmitter laptop and codeword tray are INTERSECTING!");
-      }
-    }
-  });
-
   return (
-    <group position={position} ref={laptopRef}>
+    <group position={position}>
       <LaptopStation3D
         stationType="tx"
         title="TX-01"
-        deskWidth={9.5}
-        laptopPosition={[0, -1.37, -0.4]}
         statusBadge={stage === 'encoding' ? 'ENCODING' : isSent ? 'SENT' : 'READY'}
         badgeTone={stage === 'encoding' ? 'blue' : isSent ? 'green' : 'blue'}
         keyboardContent={
-          <group position={[0, 0.035, 0.5]} rotation={[-Math.PI / 2, 0, 0]}>
+          <group position={[0, 0.02, 0.05]}>
             {message.map((bit, index) => (
               <group key={'message-key-' + index} position={[firstKeyX + index * keySpacing, 0, 0]}>
                 <MessageKey

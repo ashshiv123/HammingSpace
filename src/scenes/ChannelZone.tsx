@@ -14,7 +14,6 @@ export const ChannelZone: React.FC<ChannelZoneProps> = ({
 }) => {
   const {
     codeword,
-    revealedCodeword,
     receivedVector,
     stage,
     errorPositions,
@@ -42,7 +41,7 @@ export const ChannelZone: React.FC<ChannelZoneProps> = ({
   });
 
   const displayVector =
-    stage === 'idle' || stage === 'encoding' ? revealedCodeword : receivedVector;
+    stage === 'idle' || stage === 'encoding' ? codeword : receivedVector;
   const hasError = errorPositions.length > 0;
 
   return (

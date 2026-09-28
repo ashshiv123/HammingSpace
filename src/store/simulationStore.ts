@@ -47,7 +47,6 @@ export interface SimulationState {
   // Pipeline data
   message: number[];
   codeword: number[];
-  revealedCodeword: (number | null)[];
   receivedVector: number[];
   errorVector: number[];
   syndrome: number[];
@@ -91,7 +90,6 @@ export interface SimulationState {
   toggleMessageBit: (i: number) => void;
   setMessage: (newMessage: number[]) => void;
   encode: () => void;
-  triggerCodewordReveal: () => void;
   startExplainEncoding: () => void;
   startExplainDecoding: () => void;
   toggleChannelBit: (i: number) => void;
@@ -297,7 +295,6 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
     set({
       message: newMessage,
-      revealedCodeword: new Array(get().n).fill(null),
       stage: 'idle',
       errorPositions: [],
       errorVector: new Array(get().n).fill(0),
@@ -316,7 +313,6 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     if (newMessage.length !== k) return;
     set({
       message: newMessage,
-      revealedCodeword: new Array(n).fill(null),
       stage: 'idle',
       errorPositions: [],
       errorVector: new Array(n).fill(0),
@@ -444,12 +440,12 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
         errorPositions: [],
         syndrome: new Array(n - k).fill(0),
         correctedVector: new Array(n).fill(0),
+        stage: 'inChannel',
         calculationSteps: [],
         currentStepIndex: 0,
         isAnimationPlaying: false,
         showLiveHUD: false,
       });
-      get().triggerCodewordReveal();
     } else if (currentStep.type === 'syndrome') {
       const result = decodeAndCorrect(receivedVector, H, syndromeTable);
       const hasError = result.syndrome.some((b) => b === 1);
@@ -610,8 +606,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
   finishLessonPhase: (phase: 'encoding' | 'decoding') => {
     if (phase === 'encoding') {
-      set({ lessonOpen: false, lessonPhase: null, lessonStep: 1 });
-      get().triggerCodewordReveal();
+      set({ lessonOpen: false, lessonPhase: null, lessonStep: 1, stage: 'inChannel', cameraFocus: 'channel' });
       return;
     }
 
@@ -634,31 +629,6 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   skipLesson: () => {
     const phase = get().lessonPhase;
     if (phase) get().finishLessonPhase(phase);
-  },
-
-  triggerCodewordReveal: () => {
-    const { codeword, k, n } = get();
-    
-    // First, drop all data bits in
-    const revealed = new Array(n).fill(null);
-    for (let i = 0; i < k; i++) {
-      revealed[i] = codeword[i];
-    }
-    set({ revealedCodeword: [...revealed] });
-
-    // Then animate parity bits one by one ~150ms apart
-    let pIdx = k;
-    const interval = setInterval(() => {
-      if (pIdx < n) {
-        revealed[pIdx] = codeword[pIdx];
-        set({ revealedCodeword: [...revealed] });
-        pIdx++;
-      } else {
-        clearInterval(interval);
-        // After build completes, switch status to SENT (stage = inChannel) and slide tray
-        set({ stage: 'inChannel', cameraFocus: 'channel' });
-      }
-    }, 150);
   },
 
   correct: () => {

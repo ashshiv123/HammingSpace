@@ -12,9 +12,6 @@ export interface LaptopStation3DProps {
   children?: React.ReactNode;
   keyboardContent?: React.ReactNode;
   deskColor?: string;
-  deskWidth?: number;
-  deskDepth?: number;
-  laptopPosition?: [number, number, number];
 }
 
 export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
@@ -26,9 +23,6 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
   children,
   keyboardContent,
   deskColor = '#1e2536',
-  deskWidth = 5.2,
-  deskDepth = 3.4,
-  laptopPosition = [0, -1.37, 0.35],
 }) => {
   const badgeColor =
     badgeTone === 'green'
@@ -46,7 +40,7 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
       {/* ================================================================= */}
       {/* Modern Desk Surface */}
       <mesh position={[0, -1.45, 0]} receiveShadow>
-        <boxGeometry args={[deskWidth, 0.10, deskDepth]} />
+        <boxGeometry args={[5.2, 0.10, 3.4]} />
         <meshStandardMaterial
           color={deskColor}
           roughness={0.65}
@@ -56,16 +50,16 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
 
       {/* Desk Chamfered Edge Trim (Warm Metallic Accent) */}
       <lineSegments position={[0, -1.45, 0]}>
-        <edgesGeometry args={[new THREE.BoxGeometry(deskWidth, 0.10, deskDepth)]} />
+        <edgesGeometry args={[new THREE.BoxGeometry(5.2, 0.10, 3.4)]} />
         <meshBasicMaterial color="#334155" />
       </lineSegments>
 
       {/* Four Sleek Brushed Aluminum Legs */}
       {[
-        [-deskWidth / 2 + 0.3, deskDepth / 2 - 0.3],
-        [deskWidth / 2 - 0.3, deskDepth / 2 - 0.3],
-        [-deskWidth / 2 + 0.3, -deskDepth / 2 + 0.3],
-        [deskWidth / 2 - 0.3, -deskDepth / 2 + 0.3],
+        [-2.3, 1.4],
+        [2.3, 1.4],
+        [-2.3, -1.4],
+        [2.3, -1.4],
       ].map(([lx, lz], idx) => (
         <mesh key={`desk-leg-${idx}`} position={[lx, -1.78, lz]}>
           <cylinderGeometry args={[0.045, 0.045, 0.65, 16]} />
@@ -78,7 +72,7 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
       ))}
 
       {/* Minimalist Leather Desk Pad */}
-      <mesh position={[laptopPosition[0], laptopPosition[1] - 0.025, laptopPosition[2] - 0.2]}>
+      <mesh position={[0, -1.395, 0.15]}>
         <boxGeometry args={[4.2, 0.015, 2.6]} />
         <meshStandardMaterial
           color="#0f172a"
@@ -90,7 +84,7 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
       {/* ================================================================= */}
       {/* 2. CLASSY 3D LAPTOP BASE (KEYBOARD DECK & TRACKPAD)               */}
       {/* ================================================================= */}
-      <group position={laptopPosition}>
+      <group position={[0, -1.37, 0.35]}>
         {/* Laptop Lower Chassis (Space Gray Anodized Aluminum) */}
         <mesh position={[0, 0, 0]}>
           <boxGeometry args={[3.8, 0.07, 2.5]} />
