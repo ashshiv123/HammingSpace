@@ -1,5 +1,4 @@
 import React, { Suspense, useRef, useEffect } from 'react';
-import CameraController from '../components/CameraController';
 import { OrbitControls } from '@react-three/drei';
 import { useThree, useFrame } from '@react-three/fiber';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -387,15 +386,12 @@ function usePerformanceMonitor() {
 }
 
 export const LabScene: React.FC = () => {
-  const { cameraFocus } = useSimulationStore();
-  const orbitRef = useRef(null);
   usePerformanceMonitor();
   useLayoutGuard();
   return (
     <>
-      {/* Dynamic Choreographed Camera with WASD Flight */}
-      <CameraController activeZone={cameraFocus} orbitRef={orbitRef} />
-      <OrbitControls ref={orbitRef} enablePan={false} minDistance={1.2} maxDistance={45} maxPolarAngle={Math.PI / 2 - 0.02} dampingFactor={0.08} enableDamping={cameraFocus !== 'firstPerson'} enableRotate={cameraFocus !== 'firstPerson'} enableZoom={cameraFocus !== 'firstPerson'} rotateSpeed={0.8} panSpeed={0.8} zoomSpeed={1.0} />
+      {/* Dynamic Choreographed Camera with WASD Flight and First Person View */}
+      <CameraManager />
 
       {/* Modern Architectural 3D Studio Room with Warm Architectural Lighting */}
       <StudioRoom3D />
