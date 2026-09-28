@@ -30,3 +30,20 @@ Files planned for this feature:
 - Multi-error decoding now reports candidate miscorrection when the real error weight exceeds guaranteed capacity.
 - P5 complete: final diagnostics clean; `npm run test:run` passes 47 tests and `npm run build` passes.
 - `/calculation` was not modified. The existing user edit in `src/components3d/BackWallDisplayBoard3D.tsx` remains untouched.
+
+## Phase 7-9 Complete: Visual and Motion Polish
+
+- Applied exact art direction theme across UI and HUD components.
+- Added smooth \ramer-motion\ staggered fade transitions in \HammingLessonOverlay\.
+- Implemented keyboard accessibility (focus trap, arrow navigation) within the overlay.
+- \ControlPanel\ restyled using neutral slate backgrounds, teal and amber semantic accent colors, and unified border radii.
+- Refactored camera choreography to use central \cameraShots\ mappings inside \LabScene.tsx\.
+- \GameControllerHUD\ and UI components' hit targets expanded to >= 40px for mobile readiness.
+- Performance and robustness improvements: 
+  - Render target DPR capped at 2.
+  - \SceneErrorBoundary\ wrapped around the \Canvas\.
+  - Added WebGL \contextlost\ recovery handler.
+  - Development layout guard hook verifies non-overlapping 3D volumes (laptop vs tray vs table).
+- Added Vitest flow contract test for state progression (S0-S7).
+- Updated Playwright QA test script to align with UI changes and extended timeouts for stable CI checks.
+

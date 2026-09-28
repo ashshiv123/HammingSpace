@@ -34,6 +34,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "qa:flow": "playwright test tests/qa-flow.spec.ts --project=chromium"
   }
 }

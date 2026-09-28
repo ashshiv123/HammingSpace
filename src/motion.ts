@@ -51,7 +51,7 @@ export function resolveDuration(token: keyof typeof motionTokens, customMs?: num
 
 // Resolve easing respecting reduced motion
 export function resolveEasing(token: keyof typeof easings): number[] {
-  if (getReducedMotion()) return easings.linear;
+  if (getReducedMotion()) return [...easings.linear];
   return [...easings[token]];
 }
 

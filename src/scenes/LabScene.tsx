@@ -1,4 +1,5 @@
 import React, { Suspense, useRef, useEffect } from 'react';
+import CameraController from '../components/CameraController';
 import { OrbitControls } from '@react-three/drei';
 import { useThree, useFrame } from '@react-three/fiber';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -340,11 +341,61 @@ const CameraManager: React.FC = () => {
   );
 };
 
+function useLayoutGuard() {
+  const { scene } = useThree();
+  const { stage } = useSimulationStore();
+  
+  useEffect(() => {
+    // @ts-ignore
+    if (import.meta.env.MODE !== 'development') return;
+    const timeout = setTimeout(() => {
+      const boxes = [];
+      scene.traverse((child) => {
+        if (child.name && (child.name.includes('Laptop') || child.name.includes('Tray') || child.name.includes('Table'))) {
+          const box = new THREE.Box3().setFromObject(child);
+          boxes.push({ name: child.name, box });
+        }
+      });
+      for (let i = 0; i < boxes.length; i++) {
+        for (let j = i + 1; j < boxes.length; j++) {
+          if (boxes[i].box.intersectsBox(boxes[j].box)) {
+            const overlap = boxes[i].box.clone().intersect(boxes[j].box);
+            const volume = (overlap.max.x - overlap.min.x) * (overlap.max.y - overlap.min.y) * (overlap.max.z - overlap.min.z);
+            if (volume > 0.05) {
+              console.warn('Layout Guard:', boxes[i].name, 'overlaps with', boxes[j].name, 'in stage', stage, 'Volume:', volume.toFixed(3));
+            }
+          }
+        }
+      }
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [stage, scene]);
+}
+
+function usePerformanceMonitor() {
+  const { gl } = useThree();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      console.log('--- PERFORMANCE INFO ---');
+      console.log('Draw Calls:', gl.info.render.calls);
+      console.log('Triangles:', gl.info.render.triangles);
+      console.log('Geometries:', gl.info.memory.geometries);
+      console.log('Textures:', gl.info.memory.textures);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [gl]);
+}
+
 export const LabScene: React.FC = () => {
+  const { cameraFocus } = useSimulationStore();
+  const orbitRef = useRef(null);
+  usePerformanceMonitor();
+  useLayoutGuard();
   return (
     <>
       {/* Dynamic Choreographed Camera with WASD Flight */}
-      <CameraManager />
+      <CameraController activeZone={cameraFocus} orbitRef={orbitRef} />
+      <OrbitControls ref={orbitRef} enablePan={false} minDistance={1.2} maxDistance={45} maxPolarAngle={Math.PI / 2 - 0.02} dampingFactor={0.08} enableDamping={cameraFocus !== 'firstPerson'} enableRotate={cameraFocus !== 'firstPerson'} enableZoom={cameraFocus !== 'firstPerson'} rotateSpeed={0.8} panSpeed={0.8} zoomSpeed={1.0} />
 
       {/* Modern Architectural 3D Studio Room with Warm Architectural Lighting */}
       <StudioRoom3D />

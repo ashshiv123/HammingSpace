@@ -132,9 +132,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       case 'idle':
         return { text: 'IDLE', color: 'text-slate-400', bg: 'bg-slate-800' };
       case 'encoding':
-        return { text: 'ENCODING', color: 'text-blue-400', bg: 'bg-blue-950/60' };
+        return { text: 'ENCODING', color: 'text-teal-400', bg: 'bg-teal-950/60' };
       case 'inChannel':
-        return { text: 'IN TRANSIT', color: 'text-blue-400', bg: 'bg-blue-950/60' };
+        return { text: 'IN TRANSIT', color: 'text-teal-400', bg: 'bg-teal-950/60' };
       case 'decoding':
         return { text: 'DECODING', color: 'text-indigo-400', bg: 'bg-indigo-950/60' };
       case 'errorDetected':
@@ -150,9 +150,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   // Minimized state
   if (isMinimized) {
     return (
-      <div className="flex items-center gap-3 px-3.5 py-2 bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-xl shadow-lg text-slate-100">
+      <div className="flex items-center gap-3 px-3.5 py-2 bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-md shadow-lg text-slate-100">
         <div className="flex items-center gap-2">
-          <Cpu className="w-3.5 h-3.5 text-blue-400" />
+          <Cpu className="w-3.5 h-3.5 text-teal-400" />
           <span className="text-xs font-mono font-semibold tracking-wider uppercase">
             Lab Controls
           </span>
@@ -175,11 +175,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   }
 
   return (
-    <div className="flex flex-col w-72 max-w-[calc(100vw-2rem)] bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-xl shadow-xl text-slate-100 overflow-hidden transition-all text-xs font-sans">
+    <div className="flex flex-col w-72 max-w-[calc(100vw-2rem)] bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-md shadow-xl text-slate-100 overflow-hidden transition-all text-xs font-sans">
       {/* Panel Header */}
       <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-950/60 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <Cpu className="w-3.5 h-3.5 text-blue-400" />
+          <Cpu className="w-3.5 h-3.5 text-teal-400" />
           <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
             Control Station
           </h2>
@@ -210,7 +210,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <select
             value={`(${n},${k})`}
             onChange={(e) => selectPreset(e.target.value)}
-            className="w-full bg-slate-950/70 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+            className="w-full bg-slate-950/70 border border-slate-800 rounded-md px-2.5 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-teal-500 cursor-pointer"
           >
             <option value="(15,11)">(15, 11) Hamming Code</option>
             <option value="(7,4)">(7, 4) Hamming Code</option>
@@ -222,23 +222,23 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="border-t border-slate-800 pt-2.5 space-y-2">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-wider">
             <span className="flex items-center gap-1 text-slate-200 font-bold">
-              <Sparkles className="w-3 h-3 text-blue-400" />
+              <Sparkles className="w-3 h-3 text-teal-400" />
               <span>Message m ({k} bits)</span>
             </span>
-            <span className="text-blue-400 font-mono font-bold">[{message.join(' ')}]</span>
+            <span className="text-teal-400 font-mono font-bold">[{message.join(' ')}]</span>
           </div>
 
           {/* Clickable Bit Chips */}
-          <div className="flex flex-wrap gap-1 bg-slate-950/70 p-1.5 rounded-lg border border-slate-800">
+          <div className="flex flex-wrap gap-1 bg-slate-950/70 p-1.5 rounded-md border border-slate-800">
             {message.map((bit, idx) => (
               <button
                 key={`ctl-mbit-${idx}`}
                 type="button"
                 disabled={stage === 'encoding' || stage === 'decoding'}
                 onClick={() => toggleMessageBit(idx)}
-                className={`w-7 h-7 rounded-lg text-xs font-mono font-bold transition cursor-pointer flex flex-col items-center justify-center ${
+                className={`w-10 h-10 rounded-md text-xs font-mono font-bold transition cursor-pointer flex flex-col items-center justify-center ${
                   bit === 1
-                    ? 'bg-blue-600 text-white shadow-md ring-1 ring-blue-400'
+                    ? 'bg-teal-600 text-white shadow-md ring-1 ring-blue-400'
                     : 'bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700'
                 } ${stage === 'encoding' || stage === 'decoding' ? 'opacity-50 cursor-not-allowed' : ''}`}
                 title={`Click to flip bit m${idx} (${bit} ➔ ${bit ^ 1})`}
@@ -251,7 +251,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
           {/* Direct Binary Text Input */}
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5 bg-slate-950/80 border border-slate-800 rounded-lg px-2.5 py-1 focus-within:border-blue-500 transition">
+            <div className="flex items-center gap-1.5 bg-slate-950/80 border border-slate-800 rounded-md px-2.5 py-1 focus-within:border-teal-500 transition">
               <span className="text-[10px] text-slate-500 font-mono">BIN:</span>
               <input
                 type="text"
@@ -316,13 +316,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <button
               type="button"
               onClick={() => setShowAsciiConverter(!showAsciiConverter)}
-              className="text-[9px] text-blue-400 hover:text-blue-300 font-mono flex items-center gap-1 cursor-pointer"
+              className="text-[9px] text-teal-400 hover:text-blue-300 font-mono flex items-center gap-1 cursor-pointer"
             >
               <span>{showAsciiConverter ? '▲ Hide Text Converter' : '▼ Convert Text (e.g. "A", "Hi") to Bits'}</span>
             </button>
 
             {showAsciiConverter && (
-              <div className="mt-1.5 p-2 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
+              <div className="mt-1.5 p-2 rounded-md bg-slate-950 border border-slate-800 space-y-1">
                 <label className="text-[9px] text-slate-400 block">
                   ASCII characters translated to {k} bits:
                 </label>
@@ -331,7 +331,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   value={asciiText}
                   onChange={(e) => handleAsciiChange(e.target.value)}
                   placeholder="Type text (e.g. A, Hi, OK)..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs font-mono text-slate-200 focus:outline-none focus:border-teal-500"
                   maxLength={Math.ceil(k / 8) + 1}
                 />
               </div>
@@ -359,7 +359,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <button
                 type="button"
                 onClick={encode}
-                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-mono font-semibold uppercase transition bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-sm"
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-mono font-semibold uppercase transition bg-teal-600 hover:bg-teal-500 text-white cursor-pointer shadow-sm"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
                 <span>Transmit & Encode</span>
@@ -370,16 +370,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 onClick={() => {
                   startExplainEncoding();
                 }}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-mono font-medium uppercase transition bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-mono font-medium uppercase transition bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                <Sparkles className="w-3.5 h-3.5 text-teal-400" />
                 <span>Step-by-Step Breakdown</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleInjectRandomNoise}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-slate-950/70 border border-slate-800 hover:border-rose-700/50 text-slate-300 hover:text-rose-300 rounded-lg text-xs font-mono transition cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-slate-950/70 border border-slate-800 hover:border-rose-700/50 text-slate-300 hover:text-rose-300 rounded-md text-xs font-mono transition cursor-pointer"
               >
                 <Zap className="w-3 h-3 text-rose-400" />
                 <span>Inject Channel Noise</span>
@@ -391,10 +391,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           {stage === 'inChannel' && (
             <div className="space-y-2">
               <div
-                className={`p-2.5 rounded-lg border text-[11px] leading-tight ${
+                className={`p-2.5 rounded-md border text-[11px] leading-tight ${
                   hasError
                     ? 'bg-rose-950/30 border-rose-600/40 text-rose-200'
-                    : 'bg-blue-950/30 border-blue-600/40 text-blue-200'
+                    : 'bg-teal-950/30 border-blue-600/40 text-blue-200'
                 }`}
               >
                 <div className="flex items-center gap-1.5 font-semibold mb-0.5">
@@ -405,7 +405,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     </>
                   ) : (
                     <>
-                      <Radio className="w-3.5 h-3.5 text-blue-400" />
+                      <Radio className="w-3.5 h-3.5 text-teal-400" />
                       <span>Codeword In Transit</span>
                     </>
                   )}
@@ -421,7 +421,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <button
                 type="button"
                 onClick={() => injectNoiseAndContinue()}
-                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-mono font-semibold uppercase transition bg-rose-600 hover:bg-rose-500 text-white cursor-pointer shadow-md"
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-mono font-semibold uppercase transition bg-rose-600 hover:bg-rose-500 text-white cursor-pointer shadow-md"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>⚡ Inject Noise & Continue</span>
@@ -430,14 +430,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <button
                 type="button"
                 onClick={decode}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-mono font-medium uppercase transition bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-sm"
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-mono font-medium uppercase transition bg-teal-600 hover:bg-teal-500 text-white cursor-pointer shadow-sm"
               >
                 <Radio className="w-3.5 h-3.5" />
                 <span>{hasError ? 'Proceed to Receiver ➔' : 'Continue (No Noise) ➔'}</span>
               </button>
 
               {/* Individual Bit Corruption Buttons */}
-              <div className="bg-slate-950/70 p-2 rounded-lg border border-slate-800 space-y-1">
+              <div className="bg-slate-950/70 p-2 rounded-md border border-slate-800 space-y-1">
                 <span className="text-[9px] text-slate-400 block font-mono">
                   Or pick a specific bit to corrupt & continue:
                 </span>
@@ -447,7 +447,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                       key={`ctl-chan-bit-${cIdx}`}
                       type="button"
                       onClick={() => injectNoiseAndContinue(cIdx)}
-                      className={`w-6 h-6 rounded text-[10px] font-mono font-bold transition cursor-pointer ${
+                      className={`w-10 h-10 rounded text-[10px] font-mono font-bold transition cursor-pointer ${
                         errorPositions.includes(cIdx)
                           ? 'bg-rose-600 text-white shadow-sm ring-1 ring-rose-400'
                           : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
@@ -465,7 +465,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           {/* STAGE 3: ERROR DETECTED */}
           {stage === 'errorDetected' && (
             <div className="space-y-2">
-              <div className="p-2.5 rounded-lg bg-rose-950/30 border border-rose-600/40 text-[11px] text-rose-200">
+              <div className="p-2.5 rounded-md bg-rose-950/30 border border-rose-600/40 text-[11px] text-rose-200">
                 <div className="flex items-center gap-1.5 font-semibold mb-0.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
                   <span>Parity Violation Detected</span>
@@ -478,7 +478,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <button
                 type="button"
                 onClick={correct}
-                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-mono font-semibold uppercase transition bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer shadow-sm"
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-mono font-semibold uppercase transition bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer shadow-sm"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Invert Bit (Correct Error)</span>
@@ -489,7 +489,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           {/* STAGE 4: CORRECTED */}
           {stage === 'corrected' && (
             <div className="space-y-2">
-              <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-600/40 text-[11px] text-emerald-200">
+              <div className="p-2.5 rounded-md bg-emerald-950/30 border border-emerald-600/40 text-[11px] text-emerald-200">
                 <div className="flex items-center gap-1.5 font-semibold mb-0.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Codeword Restored</span>
@@ -502,7 +502,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <button
                 type="button"
                 onClick={reset}
-                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-mono font-semibold uppercase transition bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-mono font-semibold uppercase transition bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>New Transmission</span>
@@ -512,13 +512,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
           {/* STAGE 5: RUNNING / CALCULATION IN PROGRESS */}
           {(stage === 'encoding' || stage === 'decoding') && !lessonOpen && (
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-blue-500/40 space-y-2">
+            <div className="p-3 rounded-md bg-slate-950/80 border border-teal-500/40 space-y-2">
               <div className="flex items-center justify-between text-xs font-mono font-semibold">
-                <span className="flex items-center gap-1.5 text-blue-400">
+                <span className="flex items-center gap-1.5 text-teal-400">
                   <Radio className="w-3.5 h-3.5 animate-spin" />
                   <span>{stage === 'encoding' ? 'Matrix Encoding' : 'Syndrome Check'}</span>
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-950 text-blue-300 border border-blue-800">
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-teal-950 text-blue-300 border border-blue-800">
                   {currentStepIndex + 1}/{calculationSteps.length}
                 </span>
               </div>
@@ -529,7 +529,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   <button
                     type="button"
                     onClick={pauseAnimation}
-                    className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono transition cursor-pointer"
+                    className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono transition cursor-pointer"
                     title="Pause"
                   >
                     <Pause className="w-3.5 h-3.5" />
@@ -538,7 +538,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   <button
                     type="button"
                     onClick={playAnimation}
-                    className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-bold transition cursor-pointer shadow-sm"
+                    className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-md bg-teal-600 hover:bg-teal-500 text-white text-xs font-mono font-bold transition cursor-pointer shadow-sm"
                     title="Play"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
@@ -548,7 +548,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono transition cursor-pointer"
+                  className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono transition cursor-pointer"
                   title="Next Step"
                 >
                   <SkipForward className="w-3.5 h-3.5" />
@@ -557,7 +557,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 <button
                   type="button"
                   onClick={replayAnimation}
-                  className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-100 text-xs font-mono transition cursor-pointer"
+                  className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-100 text-xs font-mono transition cursor-pointer"
                   title="Replay from start"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -566,7 +566,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 <button
                   type="button"
                   onClick={skipAnimation}
-                  className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-100 text-xs font-mono transition cursor-pointer"
+                  className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-100 text-xs font-mono transition cursor-pointer"
                   title="Skip to end"
                 >
                   <FastForward className="w-3.5 h-3.5" />
@@ -584,7 +584,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             <button
               type="button"
               onClick={onOpenCalculationVisualizer}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-mono font-semibold uppercase transition bg-slate-800/80 hover:bg-slate-800 text-blue-400 border border-slate-700 cursor-pointer"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md text-xs font-mono font-semibold uppercase transition bg-slate-800/80 hover:bg-slate-800 text-teal-400 border border-slate-700 cursor-pointer"
             >
               <span>🧮 2D Matrix Visualizer</span>
             </button>
@@ -595,9 +595,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="border-t border-slate-800 pt-2">
           <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1.5">
             <span>ANIMATION SPEED</span>
-            <span className="text-blue-400 font-semibold">{speedMultiplier}×</span>
+            <span className="text-teal-400 font-semibold">{speedMultiplier}×</span>
           </div>
-          <div className="grid grid-cols-3 gap-1 bg-slate-950/70 p-1 rounded-lg border border-slate-800">
+          <div className="grid grid-cols-3 gap-1 bg-slate-950/70 p-1 rounded-md border border-slate-800">
             {[0.5, 1, 2].map((spd) => (
               <button
                 key={`spd-${spd}`}
@@ -605,7 +605,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 onClick={() => setSpeedMultiplier(spd as 0.5 | 1 | 2)}
                 className={`py-1 rounded text-[10px] font-mono transition cursor-pointer ${
                   speedMultiplier === spd
-                    ? 'bg-blue-600 text-white font-semibold'
+                    ? 'bg-teal-600 text-white font-semibold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -620,7 +620,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <button
             type="button"
             onClick={reset}
-            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-slate-950/70 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 rounded-lg text-[11px] font-mono transition cursor-pointer"
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-slate-950/70 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 rounded-md text-[11px] font-mono transition cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Reset Simulation</span>
