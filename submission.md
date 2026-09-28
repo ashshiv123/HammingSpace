@@ -35,6 +35,9 @@ A browser-based 3D digital communication lab (React + Three.js) with:
    - Comprehensive interactive documentation explaining the geometry and algebra of Hamming codes with animated visual diagrams.
 7. **Automatic Encoding Walkthrough**:
    - The transmitter laptop shows the live outgoing message. Sending it automatically moves the camera to the studio display, where the encoding playback presents the active step, formula, GF(2) working, explanation, and progressively assembled codeword.
+8. **Guided Encode -> Noise -> Decode Lesson**:
+   - A gated nine-step DOM lesson opens over the 3D lab in encoding and decoding phases, using the live selected code, message, and injected error vector.
+   - The flow moves through transmitter, channel, and receiver views and ends with received/corrected vectors and the recovered message on the receiver laptop.
 
 ### Core Features
 
@@ -51,6 +54,7 @@ A browser-based 3D digital communication lab (React + Three.js) with:
 - **GF(2) Math Engine** — pure modular implementation of encode, syndrome, and table correction
 - **Educational Theory Landing Page** — scrollspy navigation, side-by-side SVG diagrams for mathematical concepts, and an animated glassmorphic background
 - **Automatic Encoding Walkthrough** — sends the live message from the transmitter to a step-by-step explanation on the back-wall display, with automatic camera focus and playback driven by the existing GF(2) calculation steps
+- **Guided Lesson Overlay** — nine paced steps with recap checkpoints, skip/restart controls, live matrices, real channel errors, and an auto-open toggle
 
 ### Technical Architecture
 
@@ -94,10 +98,10 @@ npm run build     # production build
 **Testing the Full Pipeline (Prompt 5)**:
 1. Open the app in browser. The bottom right has a **Lab Mode** selector.
 2. In the Transmitter Station, set switches to $m = [1, 0, 1, 1]$.
-3. Click **"ENCODE & SEND"**. Watch the packet assemble and launch to the Noisy Channel.
-4. **Noise Injection**: When the packet arrives in the Channel, click the 3rd bit to flip it. 
-5. Click **"SEND TO RECEIVER"**. The camera moves to the Receiver.
-6. Click **"RUN DIAGNOSTICS"** then **"APPLY CORRECTION"**.
+3. Click **"TRANSMIT & ENCODE"** and advance through Steps 1-5.
+4. **Noise Injection**: In the Channel view, click one or more `c` bits to flip them.
+5. Click **"PROCEED TO RECEIVER"** and advance through Steps 6-9.
+6. The receiver laptop shows `r`, the correction result, and the recovered message.
 7. Change the **Lab Mode** to **Custom Code Lab**. A UI panel appears top-left.
 8. Set $n=6, k=3$. Notice the 3D lab instantly drops a switch in the console and removes a row in the $G$ matrix!
 9. Toggle the transmitter message bits and click **SEND**. The laptop screen shows the outgoing vector, the camera moves to the back-wall display, and the explanation walks through row selection, column XOR, and codeword assembly automatically.
