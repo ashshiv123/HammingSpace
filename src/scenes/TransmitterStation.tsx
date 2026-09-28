@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Text } from '@react-three/drei';
 import { a, useSpring } from '@react-spring/three';
-import * as THREE from 'three';
 import { useSimulationStore } from '../store/simulationStore';
 import { LaptopStation3D } from '../components3d/LaptopStation3D';
 
@@ -11,84 +10,73 @@ export interface TransmitterStationProps {
 
 interface MessageKeyProps {
   index: number;
-  val: number;
+  value: number;
   onClick: () => void;
   disabled: boolean;
-  isContributing: boolean;
-  isActiveInStep: boolean;
-  keySize?: number;
+  isActive: boolean;
+  size: number;
 }
 
 const MessageKey: React.FC<MessageKeyProps> = ({
   index,
-  val,
+  value,
   onClick,
   disabled,
-  isContributing,
-  isActiveInStep,
-  keySize = 0.38,
+  isActive,
+  size,
 }) => {
   const [hovered, setHovered] = useState(false);
-
-  const { posY, scale, color, emissive } = useSpring({
-    posY: hovered ? 0.02 : 0.05,
-    scale: (hovered && !disabled) || isActiveInStep ? 1.06 : 1.0,
-    color: isActiveInStep ? '#3b82f6' : val === 1 ? '#2563eb' : '#1e293b',
-    emissive: isActiveInStep ? '#1d4ed8' : val === 1 ? '#1e40af' : '#000000',
-    config: { tension: 350, friction: 20 },
+  const { scale, color, emissive } = useSpring({
+    scale: hovered && !disabled ? 1.04 : isActive ? 1.03 : 1,
+    color: isActive ? '#0e7490' : value ? '#155e75' : '#1e293b',
+    emissive: isActive ? '#0891b2' : value ? '#0f766e' : '#000000',
+    config: { tension: 320, friction: 22 },
   });
 
   return (
     <a.group
       scale={scale}
-      onClick={(e) => {
-        e.stopPropagation();
+      onClick={(event) => {
+        event.stopPropagation();
         if (!disabled) onClick();
       }}
-      onPointerOver={(e) => {
-        e.stopPropagation();
+      onPointerOver={(event) => {
+        event.stopPropagation();
         if (!disabled) setHovered(true);
       }}
       onPointerOut={() => setHovered(false)}
     >
-      {/* Key Bezel Socket Well */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[keySize * 1.1, keySize * 1.1, 0.06]} />
-        <meshStandardMaterial color="#0f172a" roughness={0.7} />
+      <mesh>
+        <boxGeometry args={[size * 1.1, size * 1.1, 0.06]} />
+        <meshStandardMaterial color="#0f172a" roughness={0.75} />
       </mesh>
-
-      {/* Extruded Key Cap */}
-      <a.mesh position-z={posY}>
-        <boxGeometry args={[keySize, keySize, 0.10]} />
+      <a.mesh position={[0, 0, 0.05]}>
+        <boxGeometry args={[size, size, 0.1]} />
         <a.meshStandardMaterial
           color={color}
           emissive={emissive}
-          emissiveIntensity={val === 1 || isActiveInStep ? 0.6 : 0.0}
-          roughness={0.3}
-          metalness={0.7}
+          emissiveIntensity={value || isActive ? 0.22 : 0}
+          roughness={0.5}
+          metalness={0.35}
         />
       </a.mesh>
-
-      {/* Numeric readout on Key Top */}
       <Text
-        position={[0, 0, 0.12]}
-        fontSize={keySize * 0.48}
-        color={val === 1 || isActiveInStep ? '#ffffff' : '#94a3b8'}
+        position={[0, 0, 0.11]}
+        fontSize={size * 0.48}
+        color={value || isActive ? '#f8fafc' : '#94a3b8'}
         anchorX="center"
         anchorY="middle"
       >
-        {val.toString()}
+        {value}
       </Text>
-
-      {/* Bit label above key (m0, m1...) */}
       <Text
-        position={[0, keySize * 0.65, 0.04]}
-        fontSize={Math.min(0.10, keySize * 0.30)}
-        color={isActiveInStep ? '#60a5fa' : isContributing ? '#93c5fd' : '#64748b'}
+        position={[0, size * 0.65, 0.04]}
+        fontSize={Math.min(0.1, size * 0.3)}
+        color={isActive ? '#67e8f9' : '#64748b'}
         anchorX="center"
         anchorY="middle"
       >
-        {`m${index}`}
+        {'m' + index}
       </Text>
     </a.group>
   );
@@ -99,174 +87,139 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
 }) => {
   const {
     k,
-    n,
     message,
     codeword,
     toggleMessageBit,
     encode,
-    startExplainEncoding,
     stage,
     calculationSteps,
     currentStepIndex,
-    showLiveHUD,
   } = useSimulationStore();
   const [encodeHovered, setEncodeHovered] = useState(false);
 
   const currentStep = calculationSteps[currentStepIndex];
-  const isEncodingCalc = stage === 'encoding' && !!currentStep;
-
-  // Generic dynamic sizing for message keys on laptop keyboard
+  const isEncodingCalculation = stage === 'encoding' && !!currentStep;
   const keySpacing = Math.min(0.42, Math.max(0.24, 2.8 / k));
   const keySize = keySpacing * 0.72;
-  const startKeyX = -((k - 1) * keySpacing) / 2;
+  const firstKeyX = -((k - 1) * keySpacing) / 2;
 
-  const { encodeBtnScale, encodeBtnColor, encodeBtnEmissive } = useSpring({
-    encodeBtnScale: encodeHovered && stage !== 'encoding' && stage !== 'decoding' ? 1.05 : 1.0,
-    encodeBtnColor: stage !== 'encoding' && stage !== 'decoding' ? (encodeHovered ? '#1d4ed8' : '#2563eb') : '#1e293b',
-    encodeBtnEmissive: stage !== 'encoding' && stage !== 'decoding' ? '#1e40af' : '#000000',
-    config: { tension: 300, friction: 20 },
+  const { encodeButtonScale, encodeButtonColor } = useSpring({
+    encodeButtonScale: encodeHovered ? 1.04 : 1,
+    encodeButtonColor: encodeHovered ? '#0e7490' : '#155e75',
+    config: { tension: 300, friction: 22 },
+  });
+
+  const isSent = stage !== 'idle' && stage !== 'encoding';
+  const visibleVector = isSent ? codeword : message;
+  const bitSpacing = Math.min(0.31, 3.28 / Math.max(visibleVector.length, 1));
+  const firstBitX = -((visibleVector.length - 1) * bitSpacing) / 2;
+
+  const laptopRef = useRef<THREE.Group>(null);
+  useFrame(() => {
+    const trayRef = (window as any).__devTrayRef;
+    if (laptopRef.current && trayRef && trayRef.current) {
+      const box1 = new THREE.Box3().setFromObject(laptopRef.current);
+      const box2 = new THREE.Box3().setFromObject(trayRef.current);
+      // Reduce the boxes slightly to avoid false positives from anti-aliasing / tight margins
+      box1.expandByScalar(-0.01);
+      box2.expandByScalar(-0.01);
+      if (box1.intersectsBox(box2)) {
+        console.warn("DEV CHECK: Transmitter laptop and codeword tray are INTERSECTING!");
+      }
+    }
   });
 
   return (
-    <group position={position}>
-      {/* 3D Modern Studio Desk & Laptop TX Station */}
+    <group position={position} ref={laptopRef}>
       <LaptopStation3D
         stationType="tx"
-        title="TRANSMITTER • TX-01"
-        subtitle={
-          isEncodingCalc
-            ? `Multiplying: c = m·G • Col c${currentStep?.activeCol ?? '...'}/${n}`
-            : `Input ${k}-bit Message • Systematic Generator G [${k}×${n}]`
-        }
-          statusBadge={stage === 'encoding' ? 'ENCODING' : stage !== 'idle' ? 'SENT' : 'READY'}
-          badgeTone={stage === 'encoding' ? 'blue' : stage !== 'idle' ? 'green' : 'blue'}
+        title="TX-01"
+        deskWidth={9.5}
+        laptopPosition={[0, -1.37, -0.4]}
+        statusBadge={stage === 'encoding' ? 'ENCODING' : isSent ? 'SENT' : 'READY'}
+        badgeTone={stage === 'encoding' ? 'blue' : isSent ? 'green' : 'blue'}
         keyboardContent={
-          <group position={[0, 0.02, 0.05]}>
-            {/* Interactive Message Keys on Laptop Deck */}
-            {message.map((bit, idx) => {
-              const x = startKeyX + idx * keySpacing;
-              const isContributing = bit === 1;
-              const isActiveInStep = isEncodingCalc && currentStep?.activeRow === idx;
-
-              return (
-                <group key={`key-${idx}`} position={[x, 0, 0]}>
-                  <MessageKey
-                    index={idx}
-                    val={bit}
-                    onClick={() => toggleMessageBit(idx)}
-                    disabled={stage === 'encoding' || stage === 'decoding'}
-                    isContributing={isContributing}
-                    isActiveInStep={isActiveInStep}
-                    keySize={keySize}
-                  />
-                </group>
-              );
-            })}
-
-            {/* Quick Encode Return Key on Laptop Right Deck */}
-            {stage === 'idle' && <a.group
-              position={[1.35, 0, 0]}
-              scale={encodeBtnScale}
-              onClick={(e) => {
-                e.stopPropagation();
-                encode();
-              }}
-              onPointerOver={(e) => {
-                e.stopPropagation();
-                setEncodeHovered(true);
-              }}
-              onPointerOut={() => setEncodeHovered(false)}
-            >
-              <a.mesh position={[0, 0, 0.05]}>
-                <boxGeometry args={[0.72, 0.32, 0.08]} />
-                <a.meshStandardMaterial
-                  color={encodeBtnColor}
-                  emissive={encodeBtnEmissive}
-                  emissiveIntensity={0.5}
-                  roughness={0.3}
-                  metalness={0.7}
+          <group position={[0, 0.035, 0.5]} rotation={[-Math.PI / 2, 0, 0]}>
+            {message.map((bit, index) => (
+              <group key={'message-key-' + index} position={[firstKeyX + index * keySpacing, 0, 0]}>
+                <MessageKey
+                  index={index}
+                  value={bit}
+                  onClick={() => toggleMessageBit(index)}
+                  disabled={stage === 'encoding' || stage === 'decoding'}
+                  isActive={isEncodingCalculation && currentStep?.activeRow === index}
+                  size={keySize}
                 />
-              </a.mesh>
-              <Text
-                position={[0, 0, 0.10]}
-                fontSize={0.09}
-                color="#ffffff"
-                anchorX="center"
-                anchorY="middle"
-                letterSpacing={0.04}
+              </group>
+            ))}
+            {stage === 'idle' && (
+              <a.group
+                position={[1.35, 0, 0]}
+                scale={encodeButtonScale}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  encode();
+                }}
+                onPointerOver={(event) => {
+                  event.stopPropagation();
+                  setEncodeHovered(true);
+                }}
+                onPointerOut={() => setEncodeHovered(false)}
               >
-                SEND
-              </Text>
-            </a.group>
-            }
+                <a.mesh position={[0, 0, 0.05]}>
+                  <boxGeometry args={[0.72, 0.32, 0.08]} />
+                  <a.meshStandardMaterial
+                    color={encodeButtonColor}
+                    emissive="#0f766e"
+                    emissiveIntensity={0.25}
+                    roughness={0.5}
+                    metalness={0.35}
+                  />
+                </a.mesh>
+                <Text
+                  position={[0, 0, 0.1]}
+                  fontSize={0.09}
+                  color="#ffffff"
+                  anchorX="center"
+                  anchorY="middle"
+                  letterSpacing={0.04}
+                >
+                  SEND
+                </Text>
+              </a.group>
+            )}
           </group>
         }
       >
-        {/* Laptop screen shows the live outgoing message selected on the keyboard. */}
         <group position={[0, -0.05, 0]}>
-          {(() => {
-            const sent = stage !== 'idle' && stage !== 'encoding';
-            const visibleVector = sent ? codeword : message;
-            const label = sent ? 'CODEWORD c' : 'OUTGOING MESSAGE m';
-            const spacing = Math.min(0.27, 3.0 / visibleVector.length);
+          {visibleVector.map((bit, index) => {
+            const isParity = isSent && index >= k;
             return (
-              <>
-          <Text
-            position={[0, 0.48, 0.02]}
-            fontSize={0.12}
-            color="#93c5fd"
-            anchorX="center"
-            anchorY="middle"
-            letterSpacing={0.06}
-          >
-            {label}
-          </Text>
-          {visibleVector.map((bit, idx) => {
-            const x = ((visibleVector.length - 1) * -spacing) / 2 + idx * spacing;
-            return (
-              <group key={`screen-message-bit-${idx}`} position={[x, 0.04, 0.02]}>
+              <group
+                key={'screen-bit-' + index}
+                position={[firstBitX + index * bitSpacing, 0.1, 0.02]}
+              >
                 <mesh>
-                  <planeGeometry args={[spacing * 0.82, 0.32]} />
+                  <planeGeometry args={[bitSpacing * 0.84, 0.38]} />
                   <meshStandardMaterial
-                    color={bit ? (sent && idx >= k ? '#78350f' : '#164e63') : '#111827'}
-                      emissive={bit ? (sent && idx >= k ? '#d97706' : '#0891b2') : '#000000'}
-                    emissiveIntensity={bit ? 0.4 : 0}
-                    roughness={0.35}
+                    color={isParity ? '#4a3212' : '#0f3d42'}
+                    emissive={bit ? (isParity ? '#8a5b12' : '#11656c') : '#000000'}
+                    emissiveIntensity={bit ? 0.22 : 0}
+                    roughness={0.5}
                   />
                 </mesh>
                 <Text
                   position={[0, 0, 0.01]}
-                  fontSize={0.18}
+                  fontSize={Math.min(0.19, bitSpacing * 0.75)}
                   color={bit ? '#ecfeff' : '#94a3b8'}
                   anchorX="center"
                   anchorY="middle"
                 >
-                  {String(bit)}
-                </Text>
-                <Text
-                  position={[0, -0.25, 0.01]}
-                  fontSize={0.07}
-                  color="#64748b"
-                  anchorX="center"
-                  anchorY="middle"
-                >
-                  {sent ? `c${idx}` : `m${idx}`}
+                  {bit}
                 </Text>
               </group>
             );
           })}
-          <Text
-            position={[0, -0.55, 0.02]}
-            fontSize={0.085}
-            color={stage === 'encoding' ? '#34d399' : '#94a3b8'}
-            anchorX="center"
-            anchorY="middle"
-          >
-            {sent ? 'TRANSMITTED • DATA TEAL / PARITY AMBER' : stage === 'encoding' ? 'ENCODING IN PROGRESS' : 'TOGGLE MESSAGE BITS, THEN SEND'}
-          </Text>
-              </>
-            );
-          })()}
         </group>
       </LaptopStation3D>
     </group>

@@ -6,27 +6,30 @@ export interface LaptopStation3DProps {
   position?: [number, number, number];
   stationType: 'tx' | 'rx';
   title: string;
-  subtitle: string;
+  subtitle?: string;
   statusBadge?: string;
   badgeTone?: 'blue' | 'green' | 'red' | 'amber';
   children?: React.ReactNode;
   keyboardContent?: React.ReactNode;
   deskColor?: string;
+  deskWidth?: number;
+  deskDepth?: number;
+  laptopPosition?: [number, number, number];
 }
 
 export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
   position = [0, 0, 0],
   stationType,
   title,
-  subtitle,
   statusBadge,
   badgeTone = 'blue',
   children,
   keyboardContent,
   deskColor = '#1e2536',
+  deskWidth = 5.2,
+  deskDepth = 3.4,
+  laptopPosition = [0, -1.37, 0.35],
 }) => {
-  const isTX = stationType === 'tx';
-
   const badgeColor =
     badgeTone === 'green'
       ? '#10b981'
@@ -43,26 +46,26 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
       {/* ================================================================= */}
       {/* Modern Desk Surface */}
       <mesh position={[0, -1.45, 0]} receiveShadow>
-        <boxGeometry args={[5.2, 0.10, 3.4]} />
+        <boxGeometry args={[deskWidth, 0.10, deskDepth]} />
         <meshStandardMaterial
           color={deskColor}
-          roughness={0.4}
-          metalness={0.2}
+          roughness={0.65}
+          metalness={0.12}
         />
       </mesh>
 
       {/* Desk Chamfered Edge Trim (Warm Metallic Accent) */}
       <lineSegments position={[0, -1.45, 0]}>
-        <edgesGeometry args={[new THREE.BoxGeometry(5.2, 0.10, 3.4)]} />
+        <edgesGeometry args={[new THREE.BoxGeometry(deskWidth, 0.10, deskDepth)]} />
         <meshBasicMaterial color="#334155" />
       </lineSegments>
 
       {/* Four Sleek Brushed Aluminum Legs */}
       {[
-        [-2.3, 1.4],
-        [2.3, 1.4],
-        [-2.3, -1.4],
-        [2.3, -1.4],
+        [-deskWidth / 2 + 0.3, deskDepth / 2 - 0.3],
+        [deskWidth / 2 - 0.3, deskDepth / 2 - 0.3],
+        [-deskWidth / 2 + 0.3, -deskDepth / 2 + 0.3],
+        [deskWidth / 2 - 0.3, -deskDepth / 2 + 0.3],
       ].map(([lx, lz], idx) => (
         <mesh key={`desk-leg-${idx}`} position={[lx, -1.78, lz]}>
           <cylinderGeometry args={[0.045, 0.045, 0.65, 16]} />
@@ -75,7 +78,7 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
       ))}
 
       {/* Minimalist Leather Desk Pad */}
-      <mesh position={[0, -1.395, 0.15]}>
+      <mesh position={[laptopPosition[0], laptopPosition[1] - 0.025, laptopPosition[2] - 0.2]}>
         <boxGeometry args={[4.2, 0.015, 2.6]} />
         <meshStandardMaterial
           color="#0f172a"
@@ -87,14 +90,14 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
       {/* ================================================================= */}
       {/* 2. CLASSY 3D LAPTOP BASE (KEYBOARD DECK & TRACKPAD)               */}
       {/* ================================================================= */}
-      <group position={[0, -1.37, 0.35]}>
+      <group position={laptopPosition}>
         {/* Laptop Lower Chassis (Space Gray Anodized Aluminum) */}
         <mesh position={[0, 0, 0]}>
           <boxGeometry args={[3.8, 0.07, 2.5]} />
           <meshStandardMaterial
             color="#334155"
-            metalness={0.8}
-            roughness={0.3}
+            metalness={0.55}
+            roughness={0.45}
           />
         </mesh>
 
@@ -156,7 +159,7 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
           <meshStandardMaterial
             color={badgeColor}
             emissive={badgeColor}
-            emissiveIntensity={1.2}
+            emissiveIntensity={0.35}
           />
         </mesh>
 
@@ -182,8 +185,8 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
               <boxGeometry args={[3.8, 2.5, 0.06]} />
               <meshStandardMaterial
                 color="#334155"
-                metalness={0.8}
-                roughness={0.3}
+                metalness={0.55}
+                roughness={0.45}
               />
             </mesh>
 
@@ -209,8 +212,8 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
               <meshStandardMaterial
                 color="#0b101d"
                 emissive="#080e1a"
-                emissiveIntensity={0.25}
-                roughness={0.2}
+                emissiveIntensity={0.08}
+                roughness={0.35}
               />
             </mesh>
 
@@ -227,11 +230,11 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
               {/* Station Title */}
               <Text
                 position={[-1.6, 0, 0.01]}
-                fontSize={0.10}
+                fontSize={0.13}
                 color="#f8fafc"
                 anchorX="left"
                 anchorY="middle"
-                letterSpacing={0.06}
+                letterSpacing={0.04}
               >
                 {title}
               </Text>
@@ -248,7 +251,7 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
                   </mesh>
                   <Text
                     position={[0, 0, 0.01]}
-                    fontSize={0.075}
+                    fontSize={0.085}
                     color={badgeColor}
                     anchorX="center"
                     anchorY="middle"
@@ -260,20 +263,8 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
               )}
             </group>
 
-            {/* Screen Subtitle / Status Diagnosis */}
-            <Text
-              position={[0, 0.74, 0.02]}
-              fontSize={0.08}
-              color="#94a3b8"
-              anchorX="center"
-              anchorY="middle"
-              letterSpacing={0.02}
-            >
-              {subtitle}
-            </Text>
-
-            {/* Screen Display Content (Matrices, Equations, Diagnoses) */}
-            <group position={[0, -0.15, 0.03]} scale={0.78}>
+            {/* Keep the screen focused on the live station vectors. */}
+            <group position={[0, -0.15, 0.03]} scale={0.9}>
               {children}
             </group>
           </group>

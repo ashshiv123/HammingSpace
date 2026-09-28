@@ -153,7 +153,7 @@ const BitCell: React.FC<BitCellProps> = ({
         anchorY="middle"
         letterSpacing={0.02}
       >
-        {!isComputed ? '·' : numVal.toString()}
+        {isComputed ? numVal.toString() : ''}
       </Text>
 
       {/* Index Header (c0, c1, ...) positioned cleanly above bit socket */}
@@ -208,12 +208,14 @@ export const CodewordPacket: React.FC<CodewordPacketProps> = ({
   let targetY = -0.75;
   let targetZ = 0.45;
 
+  const parkedX = transmitterX + 1.9 + 0.3 + totalWidth / 2;
+
   switch (stage) {
     case 'idle':
     case 'encoding':
-      targetX = transmitterX;
-      targetY = -1.05;
-      targetZ = 0.45;
+      targetX = parkedX;
+      targetY = -1.25; // on a low plinth on the desk (-1.45 + 0.1)
+      targetZ = 0.2;
       break;
     case 'inChannel':
       targetX = channelX;
@@ -238,8 +240,36 @@ export const CodewordPacket: React.FC<CodewordPacketProps> = ({
     config: { tension: 120, friction: 18 },
   });
 
+  const isParked = stage === 'idle' || stage === 'encoding';
+
+  const packetRef = useRef<THREE.Group>(null);
+  React.useEffect(() => {
+    (window as any).__devTrayRef = packetRef;
+  }, []);
+
   return (
-    <a.group position-x={posX} position-y={posY} position-z={posZ}>
+    <a.group ref={packetRef as any} position-x={posX} position-y={posY} position-z={posZ}>
+      {/* Plinth when parked */}
+      {isParked && (
+        <group position={[0, -0.1, 0]}>
+          <mesh receiveShadow castShadow>
+            <boxGeometry args={[totalWidth + 0.2, 0.15, 1.2]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.8} />
+          </mesh>
+          {/* Label on the plinth front */}
+          <Text
+            position={[0, 0, 0.61]}
+            fontSize={0.08}
+            color="#94a3b8"
+            anchorX="center"
+            anchorY="middle"
+            letterSpacing={0.06}
+          >
+            {`CODEWORD TRAY [${n} BITS]`}
+          </Text>
+        </group>
+      )}
+
       {/* Precision Digital Data Capsule Carrier Tray */}
       <mesh position={[0, 0, -0.06]}>
         <boxGeometry args={[totalWidth, capsuleHeight, 0.16]} />
@@ -259,18 +289,6 @@ export const CodewordPacket: React.FC<CodewordPacketProps> = ({
           opacity={isLiveMotion ? 0.8 : 0.4}
         />
       </lineSegments>
-
-      {/* Packet Title Tag placed cleanly on top edge */}
-      <Text
-        position={[0, capsuleHeight / 2 + 0.16, 0.05]}
-        fontSize={Math.min(0.12, bitWidth * 0.45)}
-        color="#f8fafc"
-        anchorX="center"
-        anchorY="middle"
-        letterSpacing={0.06}
-      >
-        {`CODEWORD TRAY [${n} BITS]`}
-      </Text>
 
       {/* Progressive Vector Bits as Circular Spheres */}
       <group position={[0, 0, 0.04]}>
@@ -303,3 +321,4 @@ export const CodewordPacket: React.FC<CodewordPacketProps> = ({
     </a.group>
   );
 };
+

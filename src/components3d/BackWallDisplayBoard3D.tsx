@@ -246,11 +246,11 @@ export const BackWallDisplayBoard3D: React.FC = () => {
       {/* ================================================================= */}
       {/* 3. THREE-COLUMN LIVE ARCHITECTURAL DISPLAY                        */}
       {/* ================================================================= */}
-      <group visible={isEncoding || isDecoding}>
-        {/* ----------------------------------------------------------------- */}
-        {/* COLUMN 1: MATHEMATICAL FORMULA & INPUT VECTOR (Left)              */}
-        {/* ----------------------------------------------------------------- */}
-        <group position={[-4.2, 0, 0.04]}>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* COLUMN 1: MATHEMATICAL FORMULA & INPUT VECTOR (Left)              */}
+      {/* ----------------------------------------------------------------- */}
+      <group position={[-4.2, 0, 0.04]}>
         {/* Panel Backdrop */}
         <mesh position={[0, 0, 0]}>
           <planeGeometry args={[3.8, 3.4]} />
@@ -750,7 +750,6 @@ export const BackWallDisplayBoard3D: React.FC = () => {
               : `Channel: BSC (Binary Symmetric Channel)`}
           </Text>
         </group>
-      </group>
       </group>
     </group>
   );
