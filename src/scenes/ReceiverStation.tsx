@@ -8,68 +8,6 @@ export interface ReceiverStationProps {
   position?: [number, number, number];
 }
 
-interface BitRowProps {
-  label: string;
-  vector: number[];
-  y: number;
-  tone: 'received' | 'corrected';
-  errorPositions?: number[];
-  correctedBit?: number | null;
-}
-
-const BitRow: React.FC<BitRowProps> = ({
-  label,
-  vector,
-  y,
-  tone,
-  errorPositions = [],
-  correctedBit,
-}) => {
-  const spacing = Math.min(0.23, 3.22 / Math.max(vector.length, 1));
-  const firstX = -((vector.length - 1) * spacing) / 2;
-
-  return (
-    <group position={[0, y, 0.02]}>
-      <Text
-        position={[-1.72, 0, 0.01]}
-        fontSize={0.085}
-        color="#94a3b8"
-        anchorX="left"
-        anchorY="middle"
-      >
-        {label}
-      </Text>
-      {vector.map((bit, index) => {
-        const isError = tone === 'received' && errorPositions.includes(index);
-        const isCorrected = tone === 'corrected' && correctedBit === index;
-        const background = isError ? '#5f1c2b' : isCorrected ? '#14532d' : '#0f3d42';
-        return (
-          <group key={label + '-' + index} position={[firstX + index * spacing, 0, 0]}>
-            <mesh>
-              <planeGeometry args={[spacing * 0.82, 0.28]} />
-              <meshStandardMaterial
-                color={background}
-                emissive={isError ? '#be123c' : isCorrected ? '#15803d' : '#000000'}
-                emissiveIntensity={isError || isCorrected ? 0.22 : 0}
-                roughness={0.5}
-              />
-            </mesh>
-            <Text
-              position={[0, 0, 0.01]}
-              fontSize={Math.min(0.15, spacing * 0.68)}
-              color={bit ? '#f8fafc' : '#94a3b8'}
-              anchorX="center"
-              anchorY="middle"
-            >
-              {bit}
-            </Text>
-          </group>
-        );
-      })}
-    </group>
-  );
-};
-
 export const ReceiverStation: React.FC<ReceiverStationProps> = ({
   position = [6.2, 0, 0],
 }) => {
@@ -86,7 +24,16 @@ export const ReceiverStation: React.FC<ReceiverStationProps> = ({
   const [correctHovered, setCorrectHovered] = useState(false);
   const isCorrected = stage === 'corrected';
   const hasError = !isCorrected && syndrome.some((bit) => bit === 1);
-  const displayReceived = receivedVector.length === n ? receivedVector : new Array(n).fill(0);
+
+  // When corrected, swap the displayed vector to the corrected one
+  const displayVector = isCorrected && correctedVector.length === n
+    ? correctedVector
+    : receivedVector.length === n
+    ? receivedVector
+    : new Array(n).fill(0);
+
+  const spacing = Math.min(0.23, 3.22 / Math.max(n, 1));
+  const firstX = -((n - 1) * spacing) / 2;
 
   const { correctButtonScale, correctButtonColor } = useSpring({
     correctButtonScale: correctHovered && stage === 'errorDetected' ? 1.04 : 1,
@@ -99,7 +46,7 @@ export const ReceiverStation: React.FC<ReceiverStationProps> = ({
       <LaptopStation3D
         stationType="rx"
         title="RX-02"
-        statusBadge={isCorrected ? 'VALID' : hasError ? 'ERROR' : stage === 'decoding' ? 'CHECKING' : 'READY'}
+        statusBadge={isCorrected ? 'VALID ✓' : hasError ? 'ERROR' : stage === 'decoding' ? 'CHECKING' : 'READY'}
         badgeTone={isCorrected ? 'green' : hasError ? 'red' : 'blue'}
         keyboardContent={
           stage === 'errorDetected' ? (
@@ -141,13 +88,83 @@ export const ReceiverStation: React.FC<ReceiverStationProps> = ({
         }
       >
         <group position={[0, -0.08, 0]}>
-          <BitRow
-            label="RECEIVED"
-            vector={displayReceived}
-            y={0.42}
-            tone="received"
-            errorPositions={errorPositions}
-          />
+          {/* Row label */}
+          <Text
+            position={[-1.72, 0.42, 0.03]}
+            fontSize={0.085}
+            color={isCorrected ? '#34d399' : '#94a3b8'}
+            anchorX="left"
+            anchorY="middle"
+          >
+            {isCorrected ? 'CORRECTED' : 'RECEIVED'}
+          </Text>
+
+          {/* Bit cells — same row, same position, bit color changes in-place */}
+          {displayVector.map((bit, index) => {
+            const wasError = !isCorrected && errorPositions.includes(index);
+            const wasCorrected = isCorrected && index === lastCorrectedBit;
+
+            // Color logic:
+            // - Error bit (not yet corrected): red background + red glow
+            // - Corrected bit (was the error, now fixed): green background + green glow
+            // - Normal bit: standard teal
+            const bgColor = wasError
+              ? '#5f1c2b'
+              : wasCorrected
+              ? '#064e3b'
+              : '#0f3d42';
+            const emissiveColor = wasError
+              ? '#be123c'
+              : wasCorrected
+              ? '#22c55e'
+              : '#000000';
+            const emissiveIntensity = wasError ? 0.45 : wasCorrected ? 0.65 : 0;
+            const textColor = wasError
+              ? '#fda4af'
+              : wasCorrected
+              ? '#ffffff'
+              : bit
+              ? '#f8fafc'
+              : '#94a3b8';
+
+            return (
+              <group key={'rx-bit-' + index} position={[firstX + index * spacing, 0.42, 0.02]}>
+                {/* Corrected bit gets a bright outer glow ring */}
+                {wasCorrected && (
+                  <mesh position={[0, 0, -0.006]}>
+                    <planeGeometry args={[spacing * 1.15, 0.38]} />
+                    <meshStandardMaterial
+                      color="#22c55e"
+                      emissive="#22c55e"
+                      emissiveIntensity={0.5}
+                      transparent
+                      opacity={0.3}
+                    />
+                  </mesh>
+                )}
+                <mesh>
+                  <planeGeometry args={[spacing * 0.82, 0.28]} />
+                  <meshStandardMaterial
+                    color={bgColor}
+                    emissive={emissiveColor}
+                    emissiveIntensity={emissiveIntensity}
+                    roughness={0.5}
+                  />
+                </mesh>
+                <Text
+                  position={[0, 0, 0.01]}
+                  fontSize={Math.min(0.15, spacing * 0.68)}
+                  color={textColor}
+                  anchorX="center"
+                  anchorY="middle"
+                >
+                  {bit}
+                </Text>
+              </group>
+            );
+          })}
+
+          {/* Syndrome row */}
           <group position={[0, -0.02, 0.02]}>
             <Text
               position={[-1.72, 0, 0.01]}
@@ -161,7 +178,7 @@ export const ReceiverStation: React.FC<ReceiverStationProps> = ({
             <Text
               position={[0.1, 0, 0.01]}
               fontSize={0.18}
-              color={hasError ? '#fb7185' : '#94a3b8'}
+              color={hasError ? '#fb7185' : isCorrected ? '#34d399' : '#94a3b8'}
               anchorX="center"
               anchorY="middle"
               letterSpacing={0.08}
@@ -169,14 +186,18 @@ export const ReceiverStation: React.FC<ReceiverStationProps> = ({
               {'[' + syndrome.join(' ') + ']'}
             </Text>
           </group>
-          {isCorrected && correctedVector.length === n && (
-            <BitRow
-              label="CORRECTED"
-              vector={correctedVector}
-              y={-0.45}
-              tone="corrected"
-              correctedBit={lastCorrectedBit}
-            />
+
+          {/* Corrected bit caption below the codeword */}
+          {isCorrected && lastCorrectedBit !== null && (
+            <Text
+              position={[firstX + lastCorrectedBit * spacing, 0.08, 0.02]}
+              fontSize={0.065}
+              color="#4ade80"
+              anchorX="center"
+              anchorY="middle"
+            >
+              ↑ fixed
+            </Text>
           )}
         </group>
       </LaptopStation3D>

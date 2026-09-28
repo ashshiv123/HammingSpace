@@ -9,6 +9,7 @@ import { TransmitterStation } from './TransmitterStation';
 import { ChannelZone } from './ChannelZone';
 import { ReceiverStation } from './ReceiverStation';
 import { StudioRoom3D } from './StudioRoom3D';
+import { TheoryScreen3D } from '../components3d/TheoryScreen3D';
 
 const CameraManager: React.FC = () => {
   const { camera, gl } = useThree();
@@ -30,84 +31,7 @@ const CameraManager: React.FC = () => {
   // WASD / Arrow Key State
   const keysDown = useRef<{ [key: string]: boolean }>({});
 
-  // Pointer Lock and Mouse Look Listeners for First-Person View
-  useEffect(() => {
-    const canvas = gl.domElement;
-
-    const handlePointerLockChange = () => {
-      isPointerLocked.current = document.pointerLockElement === canvas;
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      isMouseDown.current = true;
-      lastMouse.current = { x: e.clientX, y: e.clientY };
-
-      // In FPV, clicking the canvas locks the mouse cursor for true FPS look
-      if (cameraFocus === 'firstPerson' && !document.pointerLockElement) {
-        canvas.requestPointerLock?.();
-      }
-    };
-
-    const handleMouseUp = () => {
-      isMouseDown.current = false;
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (cameraFocus !== 'firstPerson') return;
-
-      const sensitivity = 0.0024;
-      if (isPointerLocked.current) {
-        yaw.current -= e.movementX * sensitivity;
-        pitch.current -= e.movementY * sensitivity;
-        pitch.current = Math.max(-1.42, Math.min(1.42, pitch.current));
-      } else if (isMouseDown.current) {
-        const deltaX = e.clientX - lastMouse.current.x;
-        const deltaY = e.clientY - lastMouse.current.y;
-        lastMouse.current = { x: e.clientX, y: e.clientY };
-        yaw.current -= deltaX * (sensitivity * 1.4);
-        pitch.current -= deltaY * (sensitivity * 1.4);
-        pitch.current = Math.max(-1.42, Math.min(1.42, pitch.current));
-      }
-    };
-
-    // Touch support for mobile first-person look
-    let touchStart = { x: 0, y: 0 };
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (cameraFocus !== 'firstPerson' || e.touches.length !== 1) return;
-      const deltaX = e.touches[0].clientX - touchStart.x;
-      const deltaY = e.touches[0].clientY - touchStart.y;
-      touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-
-      const sensitivity = 0.004;
-      yaw.current -= deltaX * sensitivity;
-      pitch.current -= deltaY * sensitivity;
-      pitch.current = Math.max(-1.42, Math.min(1.42, pitch.current));
-    };
-
-    document.addEventListener('pointerlockchange', handlePointerLockChange);
-    canvas.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('touchstart', handleTouchStart);
-    canvas.addEventListener('touchmove', handleTouchMove);
-
-    return () => {
-      document.removeEventListener('pointerlockchange', handlePointerLockChange);
-      canvas.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, [cameraFocus, gl]);
-
-  // Keyboard navigation listener
+  // Keyboard navigation listener for UI only
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -205,61 +129,6 @@ const CameraManager: React.FC = () => {
     // 1. FIRST-PERSON VIEW MODE (True FPS Head Rotation & Ground Walk Physics)
     // =========================================================================
     if (cameraFocus === 'firstPerson') {
-      // Smooth initial transition into FPV position
-      if (isTransitioning.current) {
-        const step = Math.min(1, delta * 3.5);
-        camera.position.lerp(targetCamPos.current, step);
-        if (camera.position.distanceTo(targetCamPos.current) < 0.05) {
-          isTransitioning.current = false;
-        }
-      }
-
-      // First-person head orientation from Euler angles (Yaw & Pitch)
-      const euler = new THREE.Euler(pitch.current, yaw.current, 0, 'YXZ');
-      camera.quaternion.setFromEuler(euler);
-
-      // Horizontal ground-plane walking vectors based on current yaw
-      const forwardX = -Math.sin(yaw.current);
-      const forwardZ = -Math.cos(yaw.current);
-      const rightX = Math.cos(yaw.current);
-      const rightZ = -Math.sin(yaw.current);
-
-      const moveX = (isW ? forwardX : isS ? -forwardX : 0) + (isD ? rightX : isA ? -rightX : 0);
-      const moveZ = (isW ? forwardZ : isS ? -forwardZ : 0) + (isD ? rightZ : isA ? -rightZ : 0);
-
-      const isWalking = Math.abs(moveX) > 0.001 || Math.abs(moveZ) > 0.001;
-
-      if (isWalking) {
-        isTransitioning.current = false;
-        const moveVec = new THREE.Vector2(moveX, moveZ).normalize();
-        const walkSpeed = isSprint ? 8.2 : 4.4;
-
-        camera.position.x += moveVec.x * walkSpeed * delta;
-        camera.position.z += moveVec.y * walkSpeed * delta;
-
-        // Subtle realistic head bobbing while walking
-        walkCycle.current += delta * (isSprint ? 14 : 9);
-        const bob = Math.sin(walkCycle.current) * (isSprint ? 0.035 : 0.02);
-        camera.position.y = 0.24 + bob;
-      } else {
-        // Return to resting eye level
-        camera.position.y = THREE.MathUtils.lerp(camera.position.y, 0.24, delta * 5);
-      }
-
-      // Jump / Crouch adjustments
-      if (isUp) camera.position.y += 3.5 * delta;
-      if (isDown) camera.position.y -= 3.5 * delta;
-
-      // Clamp camera position within studio room bounds
-      camera.position.x = THREE.MathUtils.clamp(camera.position.x, -18, 18);
-      camera.position.y = THREE.MathUtils.clamp(camera.position.y, -0.4, 4.0);
-      camera.position.z = THREE.MathUtils.clamp(camera.position.z, -3.8, 18);
-
-      // Keep OrbitControls target aligned with FPV gaze direction
-      if (controlsRef.current) {
-        const gazeDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-        controlsRef.current.target.copy(camera.position).add(gazeDir.multiplyScalar(4));
-      }
       return;
     }
 
@@ -393,12 +262,27 @@ export const LabScene: React.FC = () => {
   useLayoutGuard();
   return (
     <>
-      {/* Dynamic Choreographed Camera with WASD Flight */}
       <CameraController activeZone={cameraFocus} orbitRef={orbitRef} />
-      <OrbitControls ref={orbitRef} enablePan={false} minDistance={1.2} maxDistance={45} maxPolarAngle={Math.PI / 2 - 0.02} dampingFactor={0.08} enableDamping={cameraFocus !== 'firstPerson'} enableRotate={cameraFocus !== 'firstPerson'} enableZoom={cameraFocus !== 'firstPerson'} rotateSpeed={0.8} panSpeed={0.8} zoomSpeed={1.0} />
+      <OrbitControls
+        ref={orbitRef}
+        enablePan={true}
+        minDistance={1.2}
+        maxDistance={45}
+        maxPolarAngle={Math.PI / 2 - 0.02}
+        dampingFactor={0.08}
+        enableDamping
+        enableRotate
+        enableZoom
+        rotateSpeed={0.8}
+        panSpeed={0.8}
+        zoomSpeed={1.0}
+      />
 
       {/* Modern Architectural 3D Studio Room with Warm Architectural Lighting */}
       <StudioRoom3D />
+
+      {/* Back Wall Theory Display (Crisp CSS3D + Canvas Anim) */}
+      <TheoryScreen3D />
 
       {/* 3D Stations Pipeline */}
       <Suspense fallback={null}>

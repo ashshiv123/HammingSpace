@@ -33,6 +33,10 @@ const ZONE_CAMERAS = {
     position: new THREE.Vector3(0, 12, 22),
     target: new THREE.Vector3(0, 1, 0),
   },
+  firstPerson: {
+    position: new THREE.Vector3(0, 2.2, 5.8),
+    target: new THREE.Vector3(0, 3.8, -6.5),
+  },
 };
 
 const LERP_SPEED = 2.5;

@@ -15,12 +15,14 @@ export const ChannelZone: React.FC<ChannelZoneProps> = ({
   const {
     codeword,
     receivedVector,
+    correctedVector,
     stage,
     errorPositions,
     lastCorrectedBit,
     k,
     toggleChannelBit,
     injectNoiseAndContinue,
+    correct,
     calculationSteps,
     currentStepIndex,
   } = useSimulationStore();
@@ -56,16 +58,20 @@ export const ChannelZone: React.FC<ChannelZoneProps> = ({
         />
       </mesh>
 
-      {/* Directional Data Path Indicators (Flow from TX Laptop to RX Laptop) */}
+      {/* Directional Data Path Indicators */}
       <group position={[0, -0.28, 0.45]}>
+        <mesh position={[0, 0, -0.01]}>
+          <planeGeometry args={[9.5, 0.28]} />
+          <meshStandardMaterial color="#060913" transparent opacity={0.6} />
+        </mesh>
         <Text
-          fontSize={0.11}
+          fontSize={0.16}
           color="#64748b"
           anchorX="center"
           anchorY="middle"
-          letterSpacing={0.08}
+          letterSpacing={0.06}
         >
-          {`TX LAPTOP ──────── OPTICAL DATA LINK ────────► RX LAPTOP`}
+          {`TX  ──────────── OPTICAL DATA LINK ────────────►  RX`}
         </Text>
       </group>
 
@@ -101,27 +107,41 @@ export const ChannelZone: React.FC<ChannelZoneProps> = ({
 
       {/* Channel Header Label */}
       <group position={[0, 2.2, 0]}>
+        {/* Backdrop for readability */}
+        <mesh position={[0, 0, -0.01]}>
+          <planeGeometry args={[5.5, 0.55]} />
+          <meshStandardMaterial color="#060913" transparent opacity={0.7} />
+        </mesh>
         <Text
-          fontSize={0.20}
+          fontSize={0.28}
           color="#f8fafc"
           anchorX="center"
           anchorY="middle"
-          letterSpacing={0.06}
+          letterSpacing={0.08}
+          outlineWidth={0.012}
+          outlineColor="#000000"
         >
           PROPAGATION CHANNEL
         </Text>
+        {/* Subtitle backdrop */}
+        <mesh position={[0, -0.36, -0.01]}>
+          <planeGeometry args={[6.5, 0.32]} />
+          <meshStandardMaterial color="#060913" transparent opacity={0.65} />
+        </mesh>
         <Text
-          position={[0, -0.22, 0]}
-          fontSize={0.12}
+          position={[0, -0.36, 0]}
+          fontSize={0.16}
           color={hasError ? '#fb7185' : '#94a3b8'}
           anchorX="center"
           anchorY="middle"
+          outlineWidth={0.008}
+          outlineColor="#000000"
         >
           {hasError
-            ? `Noise Injected: Bit c${errorPositions[0]} corrupted ➔ Proceeding to Receiver`
+            ? `Noise injected: bit c${errorPositions[0]} flipped — proceeding to receiver`
             : stage === 'inChannel'
-            ? 'Packet in Transit: Click any bit to inject noise ➔ continues to receiver'
-            : 'Binary Symmetric Channel (BSC)'}
+            ? 'Packet in transit  ·  click any bit to inject noise'
+            : 'Binary Symmetric Channel  (BSC)'}
         </Text>
       </group>
 
@@ -143,6 +163,7 @@ export const ChannelZone: React.FC<ChannelZoneProps> = ({
       {/* CodewordPacket (Travelling Central Object with progressive column reveal) */}
       <CodewordPacket
         vector={displayVector}
+        correctedVector={correctedVector}
         computedBits={
           stage === 'encoding' ? currentStep?.computedCodewordBits : undefined
         }
@@ -151,6 +172,7 @@ export const ChannelZone: React.FC<ChannelZoneProps> = ({
         lastCorrectedBit={lastCorrectedBit}
         k={k}
         onBitTap={stage === 'inChannel' ? injectNoiseAndContinue : toggleChannelBit}
+        onFixBit={stage === 'errorDetected' ? correct : undefined}
         transmitterX={-6.2}
         channelX={0}
         receiverX={6.2}

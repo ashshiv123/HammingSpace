@@ -152,28 +152,6 @@ export const StudioRoom3D: React.FC = () => {
         <planeGeometry args={[32, 16]} />
         <meshStandardMaterial color="#0f172a" roughness={0.8} />
       </mesh>
-
-      {/* Left Studio Window Frame with Soft Daylight Backing */}
-      <group position={[-17.9, 4.2, 0]}>
-        <mesh rotation={[0, Math.PI / 2, 0]}>
-          <planeGeometry args={[12, 7.5]} />
-          <meshStandardMaterial
-            color="#e2e8f0"
-            emissive="#bae6fd"
-            emissiveIntensity={0.6}
-            roughness={0.4}
-          />
-        </mesh>
-        {/* Window Mullions */}
-        <mesh position={[0.02, 0, 0]}>
-          <boxGeometry args={[0.1, 7.5, 0.12]} />
-          <meshStandardMaterial color="#1e293b" />
-        </mesh>
-        <mesh position={[0.02, 0, 0]}>
-          <boxGeometry args={[0.1, 0.12, 12]} />
-          <meshStandardMaterial color="#1e293b" />
-        </mesh>
-      </group>
     </group>
   );
 };

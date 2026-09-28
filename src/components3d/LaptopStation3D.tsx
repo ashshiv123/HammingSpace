@@ -214,30 +214,32 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
             {/* Screen Inner Header Bar */}
             <group position={[0, 0.94, 0.02]}>
               <mesh position={[0, 0, 0]}>
-                <planeGeometry args={[3.55, 0.28]} />
+                <planeGeometry args={[3.55, 0.32]} />
                 <meshStandardMaterial
                   color="#111827"
                   roughness={0.4}
                 />
               </mesh>
 
-              {/* Station Title */}
+              {/* Station Title — larger */}
               <Text
                 position={[-1.6, 0, 0.01]}
-                fontSize={0.13}
+                fontSize={0.18}
                 color="#f8fafc"
                 anchorX="left"
                 anchorY="middle"
-                letterSpacing={0.04}
+                letterSpacing={0.05}
+                outlineWidth={0.008}
+                outlineColor="#000000"
               >
                 {title}
               </Text>
 
-              {/* Station Badge */}
+              {/* Station Badge — larger */}
               {statusBadge && (
-                <group position={[1.4, 0, 0.01]}>
+                <group position={[1.3, 0, 0.01]}>
                   <mesh position={[0, 0, 0]}>
-                    <planeGeometry args={[0.65, 0.16]} />
+                    <planeGeometry args={[0.82, 0.22]} />
                     <meshStandardMaterial
                       color="#1e293b"
                       roughness={0.5}
@@ -245,11 +247,13 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
                   </mesh>
                   <Text
                     position={[0, 0, 0.01]}
-                    fontSize={0.085}
+                    fontSize={0.12}
                     color={badgeColor}
                     anchorX="center"
                     anchorY="middle"
                     letterSpacing={0.04}
+                    outlineWidth={0.006}
+                    outlineColor="#000000"
                   >
                     {statusBadge}
                   </Text>

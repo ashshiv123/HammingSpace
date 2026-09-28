@@ -56,6 +56,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     autoOpenLesson,
     setAutoOpenLesson,
     lessonOpen,
+    lastCorrectedBit,
+    correctedVector,
   } = useSimulationStore();
 
   const [isMinimized, setIsMinimized] = useState(false);
@@ -489,15 +491,66 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           {/* STAGE 4: CORRECTED */}
           {stage === 'corrected' && (
             <div className="space-y-2">
+              {/* Status Badge */}
               <div className="p-2.5 rounded-md bg-emerald-950/30 border border-emerald-600/40 text-[11px] text-emerald-200">
-                <div className="flex items-center gap-1.5 font-semibold mb-0.5">
+                <div className="flex items-center gap-1.5 font-semibold mb-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Codeword Restored</span>
                 </div>
                 <p className="text-[10px] text-slate-400">
                   Syndrome S = [000] • Valid code space verified.
                 </p>
+                {lastCorrectedBit !== null && (
+                  <p className="mt-1 text-[10px] font-mono text-emerald-300">
+                    ✓ Bit c{lastCorrectedBit} was flipped back to correct value
+                  </p>
+                )}
               </div>
+
+              {/* Corrected Codeword Bit Display */}
+              {correctedVector && correctedVector.length > 0 && (
+                <div className="p-2 rounded-md bg-slate-950/60 border border-slate-700/50">
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-slate-500 mb-1.5">
+                    Corrected Codeword c′
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {correctedVector.map((bit, idx) => {
+                      const isCorrected = idx === lastCorrectedBit;
+                      return (
+                        <div
+                          key={idx}
+                          title={`c${idx}${isCorrected ? ' ← corrected bit' : ''}`}
+                          className={`relative flex flex-col items-center`}
+                        >
+                          <span
+                            className={`flex items-center justify-center w-6 h-6 rounded font-mono text-[11px] font-bold select-none
+                              ${ isCorrected
+                                ? 'bg-emerald-500 text-white ring-2 ring-emerald-300 shadow-lg shadow-emerald-900/60 scale-110'
+                                : idx < k
+                                ? 'bg-slate-700 text-slate-200'
+                                : 'bg-slate-800 text-slate-400'
+                              }`
+                            }
+                          >
+                            {bit}
+                          </span>
+                          <span className={`text-[7px] font-mono mt-0.5 ${isCorrected ? 'text-emerald-400 font-bold' : 'text-slate-600'}`}>
+                            c{idx}
+                          </span>
+                          {isCorrected && (
+                            <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[8px] text-emerald-300 font-bold">↓</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-1.5 text-[9px] text-slate-500 font-mono">
+                    {lastCorrectedBit !== null
+                      ? `↑ Green bit c${lastCorrectedBit} was the corrected position`
+                      : 'No error detected — codeword was already valid'}
+                  </p>
+                </div>
+              )}
 
               <button
                 type="button"

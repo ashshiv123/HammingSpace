@@ -18,6 +18,8 @@ export const StageInstruction: React.FC = () => {
     correct,
     encode,
     injectNoiseAndContinue,
+    reset,
+    lastCorrectedBit,
   } = useSimulationStore();
 
   const getInstruction = () => {
@@ -90,11 +92,17 @@ export const StageInstruction: React.FC = () => {
         return {
           step: 'Step 4 of 4',
           title: 'Codeword Restored',
-          text: 'Offending bit inverted back to valid code space via coset decoding. Codeword is orthogonal to H.',
+          text: lastCorrectedBit !== null
+            ? `Bit c${lastCorrectedBit} was inverted back to the valid code space via coset decoding. Codeword is orthogonal to H.`
+            : 'No error detected — codeword was already in the valid code space.',
           accent: 'text-emerald-400',
           badgeBg: 'bg-emerald-950/50 border-emerald-500/40 text-emerald-300',
           icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
-          action: null,
+          action: {
+            label: '↺ New Transmission',
+            onClick: reset,
+            color: 'bg-slate-700 hover:bg-slate-600 text-slate-100 border border-slate-600',
+          },
         };
       default:
         return {
