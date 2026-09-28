@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import TheoryCard from '../components/TheoryCard';
 import AnimatedBackground from '../components/AnimatedBackground';
+import MathText from '../lesson/MathText';
 import { 
   HammingSpaceDiagram, 
   BlockCodeDiagram, 
@@ -18,7 +19,7 @@ const theoryData = [
     title: '1. Hamming Space',
     content: (
       <>
-        <p>Coding theory is fundamentally geometric, even though it's taught algebraically. A "Hamming Space" maps codewords as physical points in an $n$-dimensional hypercube.</p>
+        <p><MathText text='Coding theory is fundamentally geometric, even though it is taught algebraically. A "Hamming Space" maps codewords as physical points in an $n$-dimensional hypercube.' /></p>
         <p>In this space, valid messages (codewords) are placed far enough apart so that if a few bits flip (causing the point to drift), it's still physically closer to the original codeword than to any other valid one.</p>
       </>
     ),
@@ -29,7 +30,7 @@ const theoryData = [
     title: '2. Linear Block Codes & Parity',
     content: (
       <>
-        <p>A Linear Block Code maps a fixed-length $k$-bit message to an $n$-bit codeword by appending $n-k$ redundant parity bits. This extra padding is what allows the receiver to detect and fix errors.</p>
+        <p><MathText text="A Linear Block Code maps a fixed-length $k$-bit message to an $n$-bit codeword by appending $n-k$ redundant parity bits. This extra padding is what allows the receiver to detect and fix errors." /></p>
         <p>The term "linear" means that adding any two valid codewords together (via XOR) produces another valid codeword.</p>
       </>
     ),
@@ -56,8 +57,8 @@ const theoryData = [
     content: (
       <>
         <p>How do we know we need exactly 3 parity bits for 4 data bits? We use the Hamming bound formula to ensure we have enough unique combinations to identify every possible single-bit error.</p>
-        <p>The formula is: <code>2^r ≥ k + r + 1</code></p>
-        <p>For $k=4$, $r=2$ gives $4 \ge 7$ (False). But $r=3$ gives $8 \ge 8$ (True). So we need 3 parity bits.</p>
+        <p>The formula is: <code><MathText text="2^r \\ge k + r + 1" /></code></p>
+        <p><MathText text="For $k=4$, $r=2$ gives $4 \\ge 7$ (False). But $r=3$ gives $8 \\ge 8$ (True). So we need 3 parity bits." /></p>
       </>
     ),
     Diagram: ParityFormulaDiagram
@@ -67,8 +68,8 @@ const theoryData = [
     title: '5. Constructing the G Matrix',
     content: (
       <>
-        <p>The Generator Matrix ($G$) is the blueprint for creating codewords. For a systematic code (where the original message appears exactly at the start of the codeword), $G$ is constructed by joining an Identity Matrix ($I$) with a Parity Matrix ($P$).</p>
-        <p>$G = [ I_k | P ]$</p>
+        <p><MathText text="The Generator Matrix ($G$) is the blueprint for creating codewords. For a systematic code (where the original message appears exactly at the start of the codeword), $G$ is constructed by joining an Identity Matrix ($I$) with a Parity Matrix ($P$)." /></p>
+        <p><MathText text="$G = [ I_k | P ]$" /></p>
       </>
     ),
     codeBlock: `G = [
@@ -83,9 +84,9 @@ const theoryData = [
     title: '6. Codeword Formation',
     content: (
       <>
-        <p>To encode our message $m$, we multiply it by the Generator matrix $G$. All math is done in Galois Field 2 (GF(2)), meaning addition is done via XOR and there are no carries.</p>
-        <p>Equation: <code>c = m × G</code></p>
-        <p>If $m = [1 0 1 1]$, the resulting codeword $c$ will have the message in the first 4 bits, and the calculated parity in the last 3 bits.</p>
+        <p><MathText text="To encode our message $m$, we multiply it by the Generator matrix $G$. All math is done in Galois Field 2 (GF(2)), meaning addition is done via XOR and there are no carries." /></p>
+        <p>Equation: <code><MathText text="c = m \\times G" /></code></p>
+        <p><MathText text="If $m = [1 0 1 1]$, the resulting codeword $c$ will have the message in the first 4 bits, and the calculated parity in the last 3 bits." /></p>
       </>
     ),
     Diagram: MatrixMultiplyDiagram
@@ -95,7 +96,7 @@ const theoryData = [
     title: '7. Transmission',
     content: (
       <>
-        <p>Once formed, the codeword $c$ is transmitted over a communication channel (like a fiber optic cable, deep space radio wave, or writing to a hard drive).</p>
+        <p><MathText text="Once formed, the codeword $c$ is transmitted over a communication channel (like a fiber optic cable, deep space radio wave, or writing to a hard drive)." /></p>
       </>
     )
   },
@@ -104,8 +105,8 @@ const theoryData = [
     title: '8. Channel Noise',
     content: (
       <>
-        <p>The physical world is noisy. Cosmic rays, thermal noise, or scratches can flip bits. In coding theory, we model this by adding an "error vector" $e$ to our codeword.</p>
-        <p>If the third bit flips, $e = [0 0 1 0 0 0 0]$.</p>
+        <p><MathText text='The physical world is noisy. Cosmic rays, thermal noise, or scratches can flip bits. In coding theory, we model this by adding an "error vector" $e$ to our codeword.' /></p>
+        <p><MathText text="If the third bit flips, $e = [0 0 1 0 0 0 0]$." /></p>
       </>
     ),
     Diagram: ChannelNoiseDiagram
@@ -115,9 +116,9 @@ const theoryData = [
     title: '9. The Received Vector',
     content: (
       <>
-        <p>The receiver doesn't know $c$ or $e$; they only get the received vector $r$.</p>
-        <p>Equation: <code>r = c + e</code> (modulo-2 arithmetic).</p>
-        <p>The receiver's job is to figure out if $r$ is a valid codeword, and if not, which bit was flipped by $e$.</p>
+        <p><MathText text="The receiver doesn't know $c$ or $e$; they only get the received vector $r$." /></p>
+        <p>Equation: <code><MathText text="r = c \\oplus e" /></code> (modulo-2 arithmetic).</p>
+        <p><MathText text="The receiver's job is to figure out if $r$ is a valid codeword, and if not, which bit was flipped by $e$." /></p>
       </>
     )
   },
@@ -126,9 +127,9 @@ const theoryData = [
     title: '10. The Parity-Check Matrix (H) & Syndrome',
     content: (
       <>
-        <p>The receiver multiplies $r$ by the transpose of the Parity-Check Matrix ($H$) to get the <strong>Syndrome ($S$)</strong>. Think of $S$ as an error fingerprint.</p>
-        <p><code>S = r × H^T</code></p>
-        <p>If $S = [0 0 0]$, there are no detected errors. If $S \neq [0 0 0]$, the syndrome precisely matches one of the columns in $H$, telling the receiver exactly which bit index is corrupted.</p>
+        <p><MathText text="The receiver multiplies $r$ by the transpose of the Parity-Check Matrix ($H$) to get the " /><strong>Syndrome (<MathText text="$S$" />)</strong>. <MathText text="Think of $S$ as an error fingerprint." /></p>
+        <p><code><MathText text="S = r \\times H^T" /></code></p>
+        <p><MathText text="If $S = [0 0 0]$, there are no detected errors. If $S \\neq [0 0 0]$, the syndrome precisely matches one of the columns in $H$, telling the receiver exactly which bit index is corrupted." /></p>
       </>
     ),
     Diagram: SyndromeDiagram
@@ -139,7 +140,7 @@ const theoryData = [
     content: (
       <>
         <p>Once the syndrome identifies the error column, the receiver flips that specific bit back to its correct state.</p>
-        <p>Because the code is systematic, the receiver can simply slice off the parity bits to perfectly recover the original $k$-bit message.</p>
+        <p><MathText text="Because the code is systematic, the receiver can simply slice off the parity bits to perfectly recover the original $k$-bit message." /></p>
       </>
     )
   }

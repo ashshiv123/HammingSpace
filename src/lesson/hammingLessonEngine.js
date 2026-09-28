@@ -110,52 +110,52 @@ function renderStep1(state) {
   const checks = [];
   for (let parityBits = 1; parityBits <= state.r; parityBits += 1) {
     const power = 2 ** parityBits;
-    checks.push(`r = ${parityBits}\n2^${parityBits} = ${power}\n${power} >= ${state.k}+${parityBits}+1 = ${state.k + parityBits + 1} ?  ${power >= state.k + parityBits + 1 ? 'YES ✓' : 'no ✗'}`);
+    checks.push(`$r = ${parityBits}$\n$2^{${parityBits}} = ${power}$\n$${power} \\ge ${state.k}+${parityBits}+1 = ${state.k + parityBits + 1}$ ?  ${power >= state.k + parityBits + 1 ? 'YES ✓' : 'no ✗'}`);
     if (power >= state.k + parityBits + 1) break;
   }
-  return { paragraphs: [`Your input ${state.dataStr} has m = ${state.k} data bits.`, 'We need enough parity bits r so that the receiver can not only detect an error, but pin down which of the n = m+r bit positions is wrong — or confirm there is no error at all.', 'We test increasing values of r until the condition holds:'], blocks: ['2^r >= m + r + 1', checks.join('\n\n')], result: `r = ${state.r} parity bits required\n\nCodeword length: n = m + r = ${state.k} + ${state.r} = ${state.n}` };
+  return { paragraphs: [`Your input ${state.dataStr} has $m = ${state.k}$ data bits.`, `We need enough parity bits $r$ so that the receiver can not only detect an error, but pin down which of the $n = m+r$ bit positions is wrong — or confirm there is no error at all.`, `We test increasing values of $r$ until the condition holds:`], blocks: [`$2^r \\ge m + r + 1$`, checks.join('\n\n')], result: `$r = ${state.r}$ parity bits required\n\nCodeword length: $n = m + r = ${state.k} + ${state.r} = ${state.n}$` };
 }
 
 function renderStep2(state) {
-  return { paragraphs: ['Parity bits go at positions that are powers of two — 1, 2, 4, 8, ... — because those positions have exactly one bit set in binary. Every other position holds a data bit, filled left to right.'], blocks: [`position -> role (n = ${state.n})`, state.positions.map((position) => position.type === 'P' ? `P${Math.log2(position.pos)}` : `D${position.dIndex}`).join('  ')], matrices: [grid([state.positions.map((position) => position.pos), state.positions.map((position) => position.type)], 'positions')], hint: `Parity positions: ${state.positions.filter((position) => position.type === 'P').map((position) => position.pos).join(', ')}. Data positions: ${state.dataPositions.map((position) => position.pos).join(', ')}.` };
+  return { paragraphs: ['Parity bits go at positions that are powers of two — 1, 2, 4, 8, ... — because those positions have exactly one bit set in binary. Every other position holds a data bit, filled left to right.'], blocks: [`position $\\rightarrow$ role ($n = ${state.n}$)`, state.positions.map((position) => position.type === 'P' ? `$P_{${Math.log2(position.pos)}}$` : `$D_{${position.dIndex}}$`).join('  ')], matrices: [grid([state.positions.map((position) => position.pos), state.positions.map((position) => position.type)], 'positions')], hint: `Parity positions: ${state.positions.filter((position) => position.type === 'P').map((position) => position.pos).join(', ')}. Data positions: ${state.dataPositions.map((position) => position.pos).join(', ')}.` };
 }
 
 function renderStep3(state) {
-  const groups = state.groups.map((group) => `P${group.p} watches over: ${group.covered.map((position) => `D${state.dataPositions.find((data) => data.pos === position).dIndex}`).join(', ')}`).join('\n\n');
-  return { paragraphs: ['Picture each parity bit as an inspector, and each position as a worker. Every inspector is assigned one binary digit to watch, and only checks in on workers whose position number has a 1 in that digit.', "We're not solving for any values here — just mapping out which data bits are watched by which inspector."], blocks: [groups], matrices: [grid(state.P, 'P')], hint: `P ${state.k}x${state.r}` };
+  const groups = state.groups.map((group) => `$P_{${group.p}}$ watches over: ${group.covered.map((position) => `$D_{${state.dataPositions.find((data) => data.pos === position).dIndex}}$`).join(', ')}`).join('\n\n');
+  return { paragraphs: ['Picture each parity bit as an inspector, and each position as a worker. Every inspector is assigned one binary digit to watch, and only checks in on workers whose position number has a 1 in that digit.', "We're not solving for any values here — just mapping out which data bits are watched by which inspector."], blocks: [groups], matrices: [grid(state.P, 'P')], hint: `$P$ is a $${state.k} \\times ${state.r}$ matrix` };
 }
 
 function renderStep4(state) {
-  return { paragraphs: ['I (identity) lets every data bit pass straight through unchanged. P is the contribution table built in Step 3. Placed side by side, they make G = [I|P].'], matrices: [grid(state.G, 'G')], hint: `G = [ I_${state.k} | P ]  (${state.k}x${state.n})` };
+  return { paragraphs: [`$I$ (identity matrix) lets every data bit pass straight through unchanged. $P$ is the contribution table built in Step 3. Placed side by side, they make $G = [I|P]$.`], matrices: [grid(state.G, 'G')], hint: `$G = [ I_{${state.k}} | P ]$  ($${state.k} \\times ${state.n}$)` };
 }
 
 function renderStep5(state) {
-  const rows = state.dataBits.map((bit, index) => `D${index + 1}=${bit} -> row ${index + 1} ${bit ? 'contributes' : 'is skipped'}`).join('\n');
-  return { paragraphs: ['Only now does your actual data enter the picture. For every data bit that is 1, XOR in that row of G; rows where the data bit is 0 are skipped — G itself never changed.'], blocks: [`${rows}\n\nXOR the contributing rows together (mod 2) -> c`], result: `c (data | parity) = ${state.c.slice(0, state.k).join('')} | ${state.c.slice(state.k).join('')}`, matrices: [grid(state.G, 'G')] };
+  const rows = state.dataBits.map((bit, index) => `$D_{${index + 1}}=${bit}$ $\\rightarrow$ row ${index + 1} ${bit ? 'contributes' : 'is skipped'}`).join('\n');
+  return { paragraphs: [`Only now does your actual data enter the picture. For every data bit that is 1, XOR ($\\oplus$) in that row of $G$; rows where the data bit is 0 are skipped — $G$ itself never changed.`], blocks: [`${rows}\n\nXOR the contributing rows together (mod 2) $\\rightarrow c$`], result: `$c$ (data | parity) = ${state.c.slice(0, state.k).join('')} | ${state.c.slice(state.k).join('')}`, matrices: [grid(state.G, 'G')] };
 }
 
 function renderStep6(state) {
-  return { paragraphs: ["Once c leaves the transmitter it travels through a channel that isn't perfectly reliable — static, interference, anything that can flip a 0 to a 1 or a 1 to a 0.", 'We describe that damage with an error vector e: a string of 0s and 1s the same length as c.'], blocks: [`c = ${state.c.join('')}\ne = ${state.e.join('')}\nr = ${state.rVector.join('')}   (r = c ⊕ e, bit by bit)`], result: `Hamming weight of e (number of injected errors) = ${weight(state.e)}`, hint: 'The errors came from the noise injected in the 3D channel; restart the lab to try a different pattern.' };
+  return { paragraphs: [`Once $c$ leaves the transmitter it travels through a channel that isn't perfectly reliable — static, interference, anything that can flip a 0 to a 1 or a 1 to a 0.`, `We describe that damage with an error vector $e$: a string of 0s and 1s the same length as $c$.`], blocks: [`$c = ${state.c.join('')}$\n$e = ${state.e.join('')}$\n$r = ${state.rVector.join('')}$   ($r = c \\oplus e$, bit by bit)`], result: `Hamming weight of $e$ (number of injected errors) = ${weight(state.e)}`, hint: 'The errors came from the noise injected in the 3D channel; restart the lab to try a different pattern.' };
 }
 
 function renderStep7(state) {
-  return { paragraphs: ['Weight is the simplest idea here: just a headcount of the 1s in a bit string. Hamming distance between two codewords is how many positions they differ in.', 'For this Hamming code, d_min = 3 — no two valid codewords are ever closer than 3 flips apart.'], blocks: ['t = floor((d_min - 1) / 2) = floor((3-1)/2) = 1'], result: 'Guaranteed correction: 1 bit\nGuaranteed detection: d_min - 1 = 2 bits', hint: `You currently have ${weight(state.e)} error${weight(state.e) === 1 ? '' : 's'} injected.` };
+  return { paragraphs: ['Weight is the simplest idea here: just a headcount of the 1s in a bit string. Hamming distance between two codewords is how many positions they differ in.', `For this Hamming code, $d_{\\min} = 3$ — no two valid codewords are ever closer than 3 flips apart.`], blocks: [`$t = \\lfloor(d_{\\min} - 1) / 2\\rfloor = \\lfloor(3-1)/2\\rfloor = 1$`], result: `Guaranteed correction: 1 bit\nGuaranteed detection: $d_{\\min} - 1 = 2$ bits`, hint: `You currently have ${weight(state.e)} error${weight(state.e) === 1 ? '' : 's'} injected.` };
 }
 
 function renderStep8(state) {
-  return { paragraphs: ['H is just P turned on its side (transposed), with an identity block attached next to it: H = [P^T | I_(n-k)]. Its whole job is a quick check: multiply any valid codeword by H^T and the answer should always come out all zeros.', `H needs n columns — one per codeword bit — and one row per parity bit, giving ${state.r} rows and ${state.n} columns.`], matrices: [grid(state.H, 'H')], hint: `H = [ P^T | I_${state.r} ]  (${state.r}x${state.n})` };
+  return { paragraphs: [`$H$ is just $P$ turned on its side (transposed), with an identity block attached next to it: $H = [P^T | I_{n-k}]$. Its whole job is a quick check: multiply any valid codeword by $H^T$ and the answer should always come out all zeros.`, `$H$ needs $n$ columns — one per codeword bit — and one row per parity bit, giving ${state.r} rows and ${state.n} columns.`], matrices: [grid(state.H, 'H')], hint: `$H = [ P^T | I_{${state.r}} ]$  ($${state.r} \\times ${state.n}$)` };
 }
 
 function renderStep9(state) {
   const syndromeText = state.S.join('');
   const outcome = state.S.every((bit) => bit === 0)
-    ? `Syndrome S = ${syndromeText} — all zero.\nThe receiver concludes: no error detected.`
+    ? `Syndrome $S = ${syndromeText}$ — all zero.\nThe receiver concludes: no error detected.`
     : weight(state.e) > state.t && state.errorPosition >= 0
-    ? `Syndrome S = ${syndromeText} matches column ${state.errorPosition + 1} of H, but ${weight(state.e)} errors were injected.\nThe decoder's candidate correction is ${state.corrected.join('')}; this exceeds the guaranteed correction capacity of ${state.t} and may be a miscorrection.`
+    ? `Syndrome $S = ${syndromeText}$ matches column ${state.errorPosition + 1} of $H$, but ${weight(state.e)} errors were injected.\nThe decoder's candidate correction is ${state.corrected.join('')}; this exceeds the guaranteed correction capacity of $t = ${state.t}$ and may be a miscorrection.`
     : state.errorPosition >= 0
-    ? `Syndrome S = ${syndromeText} matches column ${state.errorPosition + 1} of H -> error located at position ${state.errorPosition + 1}.\nFlipping that bit: corrected = ${state.corrected.join('')}\nRecovered data bits = ${state.corrected.slice(0, state.k).join('')}`
-    : `Syndrome S = ${syndromeText} has no single-bit column match.\nThe injected pattern exceeds the guaranteed correction capacity; no correction is applied.`;
-  return { paragraphs: ['All the receiver has is r. To check for trouble, it multiplies r by H^T to get a short syndrome — a fingerprint of whatever went wrong (or did not). Then it compares that fingerprint against each column of H.'], blocks: [`r = 1x${state.n}\nH^T = ${state.n}x${state.r}\nr x H^T = 1x${state.r}\n\nS = ${syndromeText}`], result: outcome, hint: 'The errors came from the noise injected in the 3D channel; restart the lab to try a different pattern.' };
+    ? `Syndrome $S = ${syndromeText}$ matches column ${state.errorPosition + 1} of $H \\rightarrow$ error located at position ${state.errorPosition + 1}.\nFlipping that bit: corrected = ${state.corrected.join('')}\nRecovered data bits = ${state.corrected.slice(0, state.k).join('')}`
+    : `Syndrome $S = ${syndromeText}$ has no single-bit column match.\nThe injected pattern exceeds the guaranteed correction capacity; no correction is applied.`;
+  return { paragraphs: [`All the receiver has is $r$. To check for trouble, it multiplies $r$ by $H^T$ to get a short syndrome $S$ — a fingerprint of whatever went wrong (or did not). Then it compares that fingerprint against each column of $H$.`], blocks: [`$r$ is $1 \\times ${state.n}$\n$H^T$ is $${state.n} \\times ${state.r}$\n$r \\times H^T$ is $1 \\times ${state.r}$\n\n$S = ${syndromeText}$`], result: outcome, hint: 'The errors came from the noise injected in the 3D channel; restart the lab to try a different pattern.' };
 }
 
 export const STEP_DEFINITIONS = [
@@ -178,15 +178,15 @@ export function renderLessonStep(state, stepNumber) {
 
 export function getRecap(state, stepNumber) {
   const recaps = [
-    `In plain terms: with ${state.k} data bits, ${state.r} parity bits is the smallest number that gives every bit position plus no error its own unique code.`,
+    `In plain terms: with $${state.k}$ data bits, $${state.r}$ parity bits is the smallest number that gives every bit position plus no error its own unique code.`,
     'In plain terms: positions 1, 2, 4, 8... are reserved for parity because each is a clean power of two. Everything else is a data slot.',
-    'In plain terms: this step only asks which parity checks would notice each data bit and records those answers as the P matrix.',
-    'In plain terms: G is a rulebook. Stack the identity matrix next to P and you have a machine that can encode any message of this length.',
-    `In plain terms: XOR together the rows of G for every 1 in your message, and the parity bits ${state.c.slice(state.k).join('')} fall out of that multiplication.`,
-    'In plain terms: the channel is unreliable, so some bits may flip. e is a map of which ones did.',
+    'In plain terms: this step only asks which parity checks would notice each data bit and records those answers as the $P$ matrix.',
+    'In plain terms: $G$ is a rulebook. Stack the identity matrix next to $P$ and you have a machine that can encode any message of this length.',
+    `In plain terms: XOR together the rows of $G$ for every 1 in your message, and the parity bits ${state.c.slice(state.k).join('')} fall out of that multiplication.`,
+    'In plain terms: the channel is unreliable, so some bits may flip. $e$ is a map of which ones did.',
     'In plain terms: because the closest any two valid codewords ever get is 3 flips apart, one flipped bit still points clearly back to the original.',
-    'In plain terms: H is built from the same P used in G, just transposed and paired with an identity block.',
-    'In plain terms: the syndrome is a fingerprint. If it is all zeros, nothing looks wrong. Otherwise, the matching column of H tells you the bit to flip back.',
+    'In plain terms: $H$ is built from the same $P$ used in $G$, just transposed and paired with an identity block.',
+    'In plain terms: the syndrome is a fingerprint. If it is all zeros, nothing looks wrong. Otherwise, the matching column of $H$ tells you the bit to flip back.',
   ];
   return recaps[stepNumber - 1];
 }
