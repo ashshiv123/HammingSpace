@@ -19,14 +19,24 @@ function BitMatrix({ matrix, role }) {
   );
 }
 
+import MathText from './MathText.jsx';
+
 function StepContent({ content }) {
   return (
     <div className="hamming-lesson__content">
-      {content.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-      {content.blocks?.map((block) => <pre className="hamming-lesson__math" key={block}>{block}</pre>)}
+      {content.paragraphs?.map((paragraph) => (
+        <p key={paragraph}><MathText text={paragraph} /></p>
+      ))}
+      {content.blocks?.map((block) => (
+        <pre className="hamming-lesson__math" key={block}><MathText text={block} /></pre>
+      ))}
       {content.matrices?.map((matrix) => <BitMatrix key={matrix.role} {...matrix} />)}
-      {content.result && <div className="hamming-lesson__result">{content.result}</div>}
-      {content.hint && <p className="hamming-lesson__hint">{content.hint}</p>}
+      {content.result && (
+        <div className="hamming-lesson__result"><MathText text={content.result} /></div>
+      )}
+      {content.hint && (
+        <p className="hamming-lesson__hint"><MathText text={content.hint} /></p>
+      )}
     </div>
   );
 }
@@ -79,7 +89,7 @@ export default function HammingLessonOverlay({
             <button className={understood ? 'is-selected' : ''} onClick={() => setUnderstood(true)} type="button">Yes, continue</button>
             <button className="is-secondary" onClick={() => setShowRecap(!showRecap)} type="button">No, explain again</button>
           </div>
-          {showRecap && <div className="hamming-lesson__recap">{getRecap(lessonState, step.number)}</div>}
+          {showRecap && <div className="hamming-lesson__recap"><MathText text={getRecap(lessonState, step.number)} /></div>}
         </div>
         <footer className="hamming-lesson__footer">
           <button className="is-secondary" disabled={isPhaseStart} onClick={() => onFinishPhase(stepNumber - 1, false)} type="button">Previous</button>
