@@ -117,7 +117,7 @@ function renderStep1(state) {
 }
 
 function renderStep2(state) {
-  return { paragraphs: ['Parity bits go at positions that are powers of two — 1, 2, 4, 8, ... — because those positions have exactly one bit set in binary. Every other position holds a data bit, filled left to right.'], blocks: [`position -> role (n = ${state.n})`, state.positions.map((position) => position.type === 'P' ? `P${Math.log2(position.pos)}` : `D${position.dIndex}`).join('  ')], matrices: [grid([state.positions.map((position) => position.pos), state.positions.map((position) => position.type), ''], 'positions')], hint: `Parity positions: ${state.positions.filter((position) => position.type === 'P').map((position) => position.pos).join(', ')}. Data positions: ${state.dataPositions.map((position) => position.pos).join(', ')}.` };
+  return { paragraphs: ['Parity bits go at positions that are powers of two — 1, 2, 4, 8, ... — because those positions have exactly one bit set in binary. Every other position holds a data bit, filled left to right.'], blocks: [`position -> role (n = ${state.n})`, state.positions.map((position) => position.type === 'P' ? `P${Math.log2(position.pos)}` : `D${position.dIndex}`).join('  ')], matrices: [grid([state.positions.map((position) => position.pos), state.positions.map((position) => position.type)], 'positions')], hint: `Parity positions: ${state.positions.filter((position) => position.type === 'P').map((position) => position.pos).join(', ')}. Data positions: ${state.dataPositions.map((position) => position.pos).join(', ')}.` };
 }
 
 function renderStep3(state) {

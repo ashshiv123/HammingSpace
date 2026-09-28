@@ -53,6 +53,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     nextStep,
     skipAnimation,
     replayAnimation,
+    autoOpenLesson,
+    setAutoOpenLesson,
+    lessonOpen,
   } = useSimulationStore();
 
   const [isMinimized, setIsMinimized] = useState(false);
@@ -332,8 +335,20 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   maxLength={Math.ceil(k / 8) + 1}
                 />
               </div>
+
             )}
           </div>
+
+          <label className="flex items-center justify-between gap-3 border-t border-slate-800 pt-2 text-[10px] text-slate-400 cursor-pointer">
+            <span>Auto-open lesson steps</span>
+            <input
+              type="checkbox"
+              checked={autoOpenLesson}
+              onChange={(event) => setAutoOpenLesson(event.target.checked)}
+              disabled={lessonOpen}
+              className="accent-teal-400"
+            />
+          </label>
         </div>
 
         {/* Dynamic Contextual Action Area Based on Stage */}
@@ -496,7 +511,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           )}
 
           {/* STAGE 5: RUNNING / CALCULATION IN PROGRESS */}
-          {(stage === 'encoding' || stage === 'decoding') && (
+          {(stage === 'encoding' || stage === 'decoding') && !lessonOpen && (
             <div className="p-3 rounded-xl bg-slate-950/80 border border-blue-500/40 space-y-2">
               <div className="flex items-center justify-between text-xs font-mono font-semibold">
                 <span className="flex items-center gap-1.5 text-blue-400">

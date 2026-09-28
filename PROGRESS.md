@@ -24,4 +24,6 @@ Files planned for this feature:
 - Engine matches the mounted app for the standard `(7,4)` and `(15,11)` matrices.
 - No matrix mismatch found.
 - P2 complete: centered DOM lesson overlay and scoped readable CSS added.
-- P3 pending.
+- P3 complete: auto-open encoding/decoding phases, live noise vectors, gated footer, and camera focus transitions wired into the mounted lab.
+- Live browser check passed through Steps 1-9 with `(15,11)` and one injected error at zero-based index 3 (`S = 1110`, corrected codeword recovered).
+- P4 pending.

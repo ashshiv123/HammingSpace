@@ -19,10 +19,17 @@ import { CalculationPage } from './pages/CalculationPage';
 import { GameControllerHUD } from './components2d/GameControllerHUD';
 import { FirstPersonReticle } from './components2d/FirstPersonReticle';
 import { Footprints } from 'lucide-react';
+import HammingLessonOverlay from './lesson/HammingLessonOverlay';
+import { createLessonState } from './lesson/hammingLessonEngine.js';
 
 export default function App() {
-  const { stage, cameraFocus, setCameraFocus } = useSimulationStore();
+  const {
+    stage, cameraFocus, setCameraFocus, message, G, H, codeword, errorVector,
+    lessonOpen, lessonPhase, lessonStep, setLessonStep, finishLessonPhase,
+    skipLesson, reset,
+  } = useSimulationStore();
   useCalculationPlayback();
+  const lessonState = createLessonState({ messageBits: message, G, H, c: codeword, errorVector });
 
   // Client-side route management: '/' for 3D Lab, '/calculation' for 2D visualizer
   const [currentView, setCurrentView] = useState<'3d' | 'calculation'>(() => {
@@ -134,6 +141,19 @@ export default function App() {
         </Canvas>
       </div>
 
+      <HammingLessonOverlay
+        open={lessonOpen}
+        lessonState={lessonState}
+        phase={lessonPhase}
+        stepNumber={lessonStep}
+        onClose={skipLesson}
+        onFinishPhase={(step, isPhaseEnd) => {
+          if (isPhaseEnd) finishLessonPhase(lessonPhase as 'encoding' | 'decoding');
+          else setLessonStep(step);
+        }}
+        onReset={reset}
+      />
+
       {/* ========================================================================= */}
       {/* ROBUST CSS GRID APPLICATION SHELL (z-10)                                   */}
       {/* High-level CSS Grid: [Header Row] / [Main Interactive Grid Stage Area]     */}
@@ -164,8 +184,24 @@ export default function App() {
             </div>
           </div>
 
-          {/* Center: Direct Mode Navigation Pill - Removed per user request */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-xl shadow-lg flex-shrink-0 invisible">
+          {/* Center: Direct Mode Navigation Pill */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-xl shadow-lg flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => navigateTo('3d')}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition cursor-pointer bg-blue-600 text-white shadow-sm"
+            >
+              🌐 3D Lab
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateTo('calculation')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition cursor-pointer text-blue-300 border border-blue-500/40 bg-blue-950/40 hover:bg-blue-900/60"
+              title="Open 2D Mathematical Matrix Visualizer (/calculation)"
+            >
+              <Calculator className="w-3.5 h-3.5 text-blue-400" />
+              <span>2D Math Visualizer</span>
+            </button>
           </div>
 
           {/* Top-Right: Unified Simulation Status Badge */}
