@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
+import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Radio,
@@ -143,7 +144,7 @@ export default function App() {
           <Canvas
             key={sceneResetKey}
             camera={{ position: [0, 3.2, 14.5], fov: 46 }}
-            gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+            gl={{ antialias: true, alpha: false, powerPreference: 'high-performance', outputColorSpace: THREE.SRGBColorSpace }}
             dpr={[1, 2]}
           >
             <color attach="background" args={['#0f1422']} />

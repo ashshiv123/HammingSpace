@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { a, useSpring } from '@react-spring/three';
 import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import { Html, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { SimulationStage } from '../store/simulationStore';
 
@@ -145,38 +145,39 @@ const BitCell: React.FC<BitCellProps> = ({
       </a.mesh>
 
       {/* Numeric Digit on Front Face of Sphere */}
-      <Text
-        position={[0, 0, radius * 1.78]}
-        fontSize={radius * 1.1}
-        color={textColor}
-        anchorX="center"
-        anchorY="middle"
-        letterSpacing={0.02}
-      >
-        {!isComputed ? '·' : numVal.toString()}
-      </Text>
+      <Html position={[0, 0, radius * 1.78]} center transform sprite pointerEvents="none" zIndexRange={[10, 0]}>
+        <div style={{
+          color: textColor,
+          fontSize: `${radius * 120}px`,
+          fontWeight: 'bold',
+          fontFamily: 'monospace',
+          textShadow: '0 1px 3px rgba(0,0,0,0.6)'
+        }}>
+          {!isComputed ? '·' : numVal.toString()}
+        </div>
+      </Html>
 
       {/* Index Header (c0, c1, ...) positioned cleanly above bit socket */}
-      <Text
-        position={[0, radius * 1.75, 0.06]}
-        fontSize={Math.min(0.12, bitWidth * 0.36)}
-        color={isError ? '#fb7185' : isCorrected ? '#34d399' : isComputed ? '#94a3b8' : '#475569'}
-        anchorX="center"
-        anchorY="middle"
-      >
-        {`c${index}`}
-      </Text>
+      <Html position={[0, radius * 1.75, 0.06]} center transform sprite pointerEvents="none" zIndexRange={[10, 0]}>
+        <div style={{
+          color: isError ? '#fb7185' : isCorrected ? '#34d399' : isComputed ? '#94a3b8' : '#475569',
+          fontSize: `${Math.min(12, bitWidth * 40)}px`,
+          fontFamily: 'monospace'
+        }}>
+          {`c${index}`}
+        </div>
+      </Html>
 
       {/* Parity vs Data Sublabel below bit socket */}
-      <Text
-        position={[0, -radius * 1.75, 0.06]}
-        fontSize={Math.min(0.095, bitWidth * 0.28)}
-        color={isParity ? '#64748b' : '#60a5fa'}
-        anchorX="center"
-        anchorY="middle"
-      >
-        {isParity ? 'par' : 'dat'}
-      </Text>
+      <Html position={[0, -radius * 1.75, 0.06]} center transform sprite pointerEvents="none" zIndexRange={[10, 0]}>
+        <div style={{
+          color: isParity ? '#64748b' : '#60a5fa',
+          fontSize: `${Math.min(10, bitWidth * 30)}px`,
+          fontFamily: 'monospace'
+        }}>
+          {isParity ? 'par' : 'dat'}
+        </div>
+      </Html>
     </a.group>
   );
 };
