@@ -31,27 +31,54 @@ export const HammingSpaceDiagram = () => (
 );
 
 // 2. Linear Block Code / Parity Diagram
-export const BlockCodeDiagram = () => (
-  <div className="w-full flex flex-col items-center">
-    <div className="flex items-center gap-2 mb-4 text-sm font-mono">
-      <div className="flex bg-indigo-900/50 border border-indigo-700/50 rounded overflow-hidden">
-        <span className="px-3 py-2 text-indigo-300 border-r border-indigo-700/50">Data (k)</span>
-        <span className="px-3 py-2 text-pink-300">Parity (n-k)</span>
+export const BlockCodeDiagram = () => {
+  const dataBits = [
+    { label: 'd₁', value: '1' },
+    { label: 'd₂', value: '0' },
+    { label: 'd₃', value: '1' },
+    { label: 'd₄', value: '1' },
+  ];
+  const parityBits = [
+    { label: 'p₁', value: '0' },
+    { label: 'p₂', value: '1' },
+    { label: 'p₃', value: '0' },
+  ];
+
+  return (
+    <div className="w-full flex flex-col items-center gap-5">
+      {/* Bit boxes */}
+      <div className="flex gap-1">
+        {dataBits.map((b, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <span className="text-[10px] font-mono text-indigo-400">{b.label}</span>
+            <div className="w-9 h-9 flex items-center justify-center rounded-md bg-indigo-900/50 border border-indigo-500/40 text-indigo-200 font-mono font-bold text-sm">
+              {b.value}
+            </div>
+          </div>
+        ))}
+        {/* Separator */}
+        <div className="flex items-end pb-1 px-0.5">
+          <div className="w-px h-7 bg-slate-600" />
+        </div>
+        {parityBits.map((b, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <span className="text-[10px] font-mono text-pink-400">{b.label}</span>
+            <div className="w-9 h-9 flex items-center justify-center rounded-md bg-pink-900/40 border border-pink-500/40 text-pink-200 font-mono font-bold text-sm">
+              {b.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pill badges — consistent monospace style */}
+      <div className="flex items-center gap-2 text-[11px] font-mono">
+        <span className="px-2.5 py-1 rounded-full bg-indigo-900/40 border border-indigo-500/30 text-indigo-300">k = 4 bits</span>
+        <span className="px-2.5 py-1 rounded-full bg-pink-900/40 border border-pink-500/30 text-pink-300">r = 3 bits</span>
+        <span className="px-2.5 py-1 rounded-full bg-slate-800 border border-slate-600 text-slate-300">n = 7 bits</span>
       </div>
     </div>
-    <svg width="200" height="40" viewBox="0 0 200 40">
-      <rect x="0" y="10" width="120" height="20" fill="#312e81" stroke="#4338ca" rx="2" />
-      <text x="60" y="24" fill="#a5b4fc" fontSize="10" textAnchor="middle">k = 4 bits</text>
-      
-      <rect x="125" y="10" width="75" height="20" fill="#831843" stroke="#be185d" rx="2" />
-      <text x="162.5" y="24" fill="#f9a8d4" fontSize="10" textAnchor="middle">r = 3 bits</text>
-      
-      <path d="M 0 35 L 200 35" stroke="#475569" strokeWidth="1" />
-      <path d="M 0 35 L 0 38 M 200 35 L 200 38" stroke="#475569" strokeWidth="1" />
-      <text x="100" y="48" fill="#94a3b8" fontSize="10" textAnchor="middle">n = 7 bits (Codeword)</text>
-    </svg>
-  </div>
-);
+  );
+};
 
 // 4. Parity Formula Diagram
 export const ParityFormulaDiagram = () => (
