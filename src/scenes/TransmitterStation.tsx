@@ -101,6 +101,7 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
     k,
     n,
     message,
+    codeword,
     toggleMessageBit,
     encode,
     startExplainEncoding,
@@ -168,11 +169,11 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
               scale={encodeBtnScale}
               onClick={(e) => {
                 e.stopPropagation();
-                if (stage !== 'encoding' && stage !== 'decoding') encode();
+                encode();
               }}
               onPointerOver={(e) => {
                 e.stopPropagation();
-                if (stage !== 'encoding' && stage !== 'decoding') setEncodeHovered(true);
+                setEncodeHovered(true);
               }}
               onPointerOut={() => setEncodeHovered(false)}
             >
@@ -181,7 +182,7 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
                 <a.meshStandardMaterial
                   color={encodeBtnColor}
                   emissive={encodeBtnEmissive}
-                  emissiveIntensity={stage !== 'encoding' && stage !== 'decoding' ? 0.5 : 0.0}
+                  emissiveIntensity={0.5}
                   roughness={0.3}
                   metalness={0.7}
                 />

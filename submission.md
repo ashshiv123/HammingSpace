@@ -38,6 +38,9 @@ A browser-based 3D digital communication lab (React + Three.js) with:
 8. **Guided Encode -> Noise -> Decode Lesson**:
    - A gated nine-step DOM lesson opens over the 3D lab in encoding and decoding phases, using the live selected code, message, and injected error vector.
    - The flow moves through transmitter, channel, and receiver views and ends with received/corrected vectors and the recovered message on the receiver laptop.
+9. **Scene recovery and type checking**:
+   - The WebGL scene is isolated behind a restartable error boundary, so lesson controls remain available if a scene component fails to render.
+   - TypeScript checks now run alongside the existing test and production build commands.
 
 ### Core Features
 
@@ -55,6 +58,7 @@ A browser-based 3D digital communication lab (React + Three.js) with:
 - **Educational Theory Landing Page** — scrollspy navigation, side-by-side SVG diagrams for mathematical concepts, and an animated glassmorphic background
 - **Automatic Encoding Walkthrough** — sends the live message from the transmitter to a step-by-step explanation on the back-wall display, with automatic camera focus and playback driven by the existing GF(2) calculation steps
 - **Guided Lesson Overlay** — nine paced steps with recap checkpoints, skip/restart controls, live matrices, real channel errors, and an auto-open toggle
+- **Scene Recovery** — a compact restart control replaces a blank page if the WebGL scene throws
 
 ### Technical Architecture
 
@@ -76,6 +80,7 @@ Single-page React 18 + Vite 5 application.
 - **@react-three/drei 9.122** — 3D helpers (Text, OrbitControls, Stars, Line)
 - **Zustand 5** — global state management
 - **Vitest 1.6** — unit testing framework
+- **TypeScript 5.5** — static checks for the React Three Fiber scene and app shell
 - **react-router-dom** — client-side routing for the application
 
 ### Innovation / Uniqueness

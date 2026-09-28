@@ -558,7 +558,7 @@ export const TeachingNarrative: React.FC<TeachingNarrativeProps> = (props) => {
           <div className="w-full bg-[#1e293b] h-[5px]">
             <div 
               className="bg-[#5fd4c4] h-full transition-all duration-300 ease-out"
-              style={{ width: \`\${((currentStep + 1) / 9) * 100}%\` }}
+              style={{ width: `${((currentStep + 1) / 9) * 100}%` }}
             ></div>
           </div>
 

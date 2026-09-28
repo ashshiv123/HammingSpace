@@ -21,6 +21,7 @@ import { FirstPersonReticle } from './components2d/FirstPersonReticle';
 import { Footprints } from 'lucide-react';
 import HammingLessonOverlay from './lesson/HammingLessonOverlay';
 import { createLessonState } from './lesson/hammingLessonEngine.js';
+import { SceneErrorBoundary } from './components2d/SceneErrorBoundary';
 
 export default function App() {
   const {
@@ -28,6 +29,7 @@ export default function App() {
     lessonOpen, lessonPhase, lessonStep, setLessonStep, finishLessonPhase,
     skipLesson, reset,
   } = useSimulationStore();
+  const [sceneResetKey, setSceneResetKey] = useState(0);
   useCalculationPlayback();
   const lessonState = createLessonState({ messageBits: message, G, H, c: codeword, errorVector });
 
@@ -131,14 +133,23 @@ export default function App() {
     <div className="relative w-screen h-screen bg-[#0b0f19] overflow-hidden select-none font-sans">
       {/* 3D WebGL Canvas Layer (Base Layer: z-0) */}
       <div className="absolute inset-0 z-0">
-        <Canvas
-          camera={{ position: [0, 3.2, 14.5], fov: 46 }}
-          gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-          dpr={[1, 2]}
+        <SceneErrorBoundary
+          resetKey={sceneResetKey}
+          onRestart={() => {
+            reset();
+            setSceneResetKey((key) => key + 1);
+          }}
         >
-          <color attach="background" args={['#0f1422']} />
-          <LabScene />
-        </Canvas>
+          <Canvas
+            key={sceneResetKey}
+            camera={{ position: [0, 3.2, 14.5], fov: 46 }}
+            gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+            dpr={[1, 2]}
+          >
+            <color attach="background" args={['#0f1422']} />
+            <LabScene />
+          </Canvas>
+        </SceneErrorBoundary>
       </div>
 
       <HammingLessonOverlay
