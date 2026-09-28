@@ -1,0 +1,41 @@
+.hamming-lesson {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 5rem 1rem 4rem;
+  color: #e7ecf5;
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.55;
+}
+
+.hamming-lesson__scrim { position: absolute; inset: 0; background: rgba(4, 8, 17, .84); backdrop-filter: blur(5px); }
+.hamming-lesson__panel { position: relative; width: min(920px, 100%); max-height: min(86vh, 850px); overflow: auto; padding: 1.5rem; background: #111a2e; border: 1px solid #22304a; border-radius: 10px; box-shadow: 0 20px 80px rgba(0, 0, 0, .6); font-size: 16px; }
+.hamming-lesson__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.hamming-lesson__header h2 { margin: .4rem 0 0; font-size: clamp(1.2rem, 2vw, 1.65rem); font-weight: 650; }
+.hamming-lesson__badge { display: inline-block; padding: .2rem .6rem; border: 1px solid; border-radius: 999px; font: 700 .75rem ui-monospace, SFMono-Regular, Consolas, monospace; text-transform: uppercase; letter-spacing: .04em; }
+.hamming-lesson__badge.is-encoding { color: #5fd4c4; border-color: #5fd4c4; }
+.hamming-lesson__badge.is-decoding { color: #e8a33d; border-color: #e8a33d; }
+.hamming-lesson__skip { padding: .3rem .5rem; color: #8ca0be; background: none; border: 0; text-decoration: underline; cursor: pointer; font: inherit; }
+.hamming-lesson__progress { height: 6px; margin: 1.2rem 0 1.35rem; overflow: hidden; background: #0e1728; border: 1px solid #22304a; border-radius: 4px; }
+.hamming-lesson__progress span { display: block; height: 100%; background: #5fd4c4; transition: width .25s ease; }
+.hamming-lesson__content p { margin: .75rem 0; }
+.hamming-lesson__math { overflow: auto; margin: .8rem 0; padding: .85rem 1rem; color: #e7ecf5; background: #0e1728; border: 1px solid #22304a; border-radius: 8px; font: .9rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; }
+.hamming-lesson__matrix { display: inline-flex; flex-direction: column; gap: 3px; margin: .55rem 0; padding: .45rem; overflow: auto; max-width: 100%; background: #0e1728; border: 1px solid #22304a; border-radius: 8px; }
+.hamming-lesson__matrix-row { display: flex; gap: 3px; }
+.hamming-lesson__cell { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border: 1px solid #22304a; border-radius: 5px; font: 700 .9rem ui-monospace, SFMono-Regular, Consolas, monospace; }
+.hamming-lesson__cell.is-data { color: #5fd4c4; }
+.hamming-lesson__cell.is-parity { color: #e8a33d; }
+.hamming-lesson__result, .hamming-lesson__recap { margin-top: .85rem; padding: .8rem 1rem; color: #5fd98e; background: #0f2418; border: 1px solid #5fd98e; border-radius: 8px; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+.hamming-lesson__hint { color: #8ca0be; font-size: .95rem; }
+.hamming-lesson__checkpoint { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed #22304a; }
+.hamming-lesson__checkpoint p { margin: 0 0 .6rem; color: #8ca0be; }
+.hamming-lesson__checkpoint-actions, .hamming-lesson__footer { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.hamming-lesson button { padding: .62rem .95rem; border: 0; border-radius: 8px; color: #08131b; background: #5fd4c4; font: 650 .92rem/1.2 Georgia, 'Times New Roman', serif; cursor: pointer; }
+.hamming-lesson button.is-secondary { color: #e7ecf5; background: transparent; border: 1px solid #22304a; }
+.hamming-lesson button.is-selected { box-shadow: 0 0 0 2px #e8a33d; }
+.hamming-lesson button:disabled { opacity: .4; cursor: default; }
+.hamming-lesson__footer { justify-content: space-between; margin-top: 1rem; }
+.hamming-lesson__footer button:last-child { margin-left: auto; }
+@media (max-width: 640px) { .hamming-lesson { padding: 3.5rem .5rem 3rem; } .hamming-lesson__panel { padding: 1rem; font-size: 15px; } .hamming-lesson__footer { justify-content: stretch; } .hamming-lesson__footer button { flex: 1 1 auto; } .hamming-lesson__footer button:last-child { margin-left: 0; } }

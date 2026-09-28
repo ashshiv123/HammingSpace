@@ -23,4 +23,5 @@ Files planned for this feature:
 - P1 complete: reference-derived engine and contract tests added.
 - Engine matches the mounted app for the standard `(7,4)` and `(15,11)` matrices.
 - No matrix mismatch found.
-- P2 pending.
+- P2 complete: centered DOM lesson overlay and scoped readable CSS added.
+- P3 pending.
