@@ -212,7 +212,7 @@ export const CodewordPacket: React.FC<CodewordPacketProps> = ({
     case 'idle':
     case 'encoding':
       targetX = transmitterX;
-      targetY = -0.75;
+      targetY = -1.05;
       targetZ = 0.45;
       break;
     case 'inChannel':
@@ -269,7 +269,7 @@ export const CodewordPacket: React.FC<CodewordPacketProps> = ({
         anchorY="middle"
         letterSpacing={0.06}
       >
-        {`DATA PACKET [${n} BINARY SPHERES]`}
+        {`CODEWORD TRAY [${n} BITS]`}
       </Text>
 
       {/* Progressive Vector Bits as Circular Spheres */}

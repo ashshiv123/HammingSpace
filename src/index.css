@@ -3,6 +3,72 @@
 :root {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   letter-spacing: -0.01em;
+
+  /* HammingSpace Design Tokens */
+  --hamm-colors-bg: #0b0f19;
+  --hamm-colors-surface: #111827;
+  --hamm-colors-surface-elevated: #1e2536;
+  --hamm-colors-border: #334155;
+  --hamm-colors-border-strong: #475569;
+  --hamm-colors-text-primary: #f8fafc;
+  --hamm-colors-text-secondary: #94a3b8;
+  --hamm-colors-text-muted: #64748b;
+  --hamm-colors-data: #0ea5e9;
+  --hamm-colors-data-bg: #0f3d42;
+  --hamm-colors-parity: #f59e0b;
+  --hamm-colors-parity-bg: #4a3212;
+  --hamm-colors-error: #f43f5e;
+  --hamm-colors-error-bg: #5f1c2b;
+  --hamm-colors-corrected: #10b981;
+  --hamm-colors-corrected-bg: #14532d;
+  --hamm-colors-status-idle: #64748b;
+  --hamm-colors-status-encoding: #3b82f6;
+  --hamm-colors-status-transit: #3b82f6;
+  --hamm-colors-status-decoding: #818cf8;
+  --hamm-colors-status-error: #f43f5e;
+  --hamm-colors-status-corrected: #10b981;
+  --hamm-colors-mat-aluminum: #334155;
+  --hamm-colors-mat-aluminum-dark: #1e293b;
+  --hamm-colors-mat-keycap: #1e293b;
+  --hamm-colors-mat-trackpad: #1e293b;
+  --hamm-colors-mat-screen-bg: #0b101d;
+  --hamm-colors-mat-screen-text: #f8fafc;
+  --hamm-colors-mat-floor: #161b26;
+  --hamm-colors-mat-rug: #1e2536;
+  --hamm-colors-mat-wall-slat: #1e293b;
+  --hamm-colors-mat-wall-cove: #fef3c7;
+  --hamm-colors-mat-wall-cove-emissive: #fbbf24;
+  --hamm-colors-mat-tray: #1e293b;
+
+  --hamm-spacing-xs: 0.25rem;
+  --hamm-spacing-sm: 0.5rem;
+  --hamm-spacing-md: 1rem;
+  --hamm-spacing-lg: 1.5rem;
+  --hamm-spacing-xl: 2rem;
+
+  --hamm-radius-sm: 6px;
+  --hamm-radius-md: 10px;
+  --hamm-radius-lg: 16px;
+  --hamm-radius-xl: 24px;
+  --hamm-radius-full: 9999px;
+
+  --hamm-shadows-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --hamm-shadows-md: 0 4px 12px rgba(0,0,0,0.4);
+  --hamm-shadows-lg: 0 20px 80px rgba(0,0,0,0.6);
+
+  --hamm-transitions-fast: 150ms;
+  --hamm-transitions-base: 300ms;
+  --hamm-transitions-slow: 600ms;
+  --hamm-transitions-camera: 1600ms;
+  --hamm-transitions-flip: 450ms;
+
+  --hamm-easing-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --hamm-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --hamm-easing-camera: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  --hamm-typography-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --hamm-typography-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --hamm-typography-serif: Georgia, "Times New Roman", serif;
 }
 
 code, kbd, samp, pre, .font-mono {
@@ -15,8 +81,8 @@ code, kbd, samp, pre, .font-mono {
     padding: 0;
     width: 100%;
     height: 100%;
-    background-color: #0b0f19;
-    color: #f8fafc;
+    background-color: var(--hamm-colors-bg);
+    color: var(--hamm-colors-text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

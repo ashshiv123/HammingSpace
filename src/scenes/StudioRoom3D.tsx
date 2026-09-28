@@ -1,6 +1,5 @@
 import React from 'react';
 import * as THREE from 'three';
-import { BackWallDisplayBoard3D } from '../components3d/BackWallDisplayBoard3D';
 
 /**
  * Modern Architectural Studio Room
@@ -138,9 +137,6 @@ export const StudioRoom3D: React.FC = () => {
           roughness={0.2}
         />
       </mesh>
-
-      {/* Architectural Studio Screen: Live Matrix & Syndrome Presentation Board */}
-      <BackWallDisplayBoard3D />
 
       {/* ================================================================= */}
       {/* 4. SIDE ARCHITECTURAL WALLS & AMBIENT NATURAL LIGHT               */}

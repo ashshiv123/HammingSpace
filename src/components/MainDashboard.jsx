@@ -1,10 +1,6 @@
 import React from 'react';
 
-export interface MainDashboardProps {
-  title?: string;
-}
-
-export const MainDashboard: React.FC<MainDashboardProps> = ({ title = 'MainDashboard' }) => {
+export const MainDashboard = ({ title = 'MainDashboard' }) => {
   return (
     <div className="maindashboard-container" style={{ padding: '10px', border: '1px solid #ccc' }}>
       <h3>{title}</h3>

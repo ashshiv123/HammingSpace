@@ -4,11 +4,17 @@
  * matrix cell highlights, row linear combinations, and column XOR arithmetic.
  */
 
+import { deriveHammingParams } from './hammingDerivation';
+
 export interface CalculationStep {
   type: 'encoding' | 'syndrome' | 'correction';
   stepIndex: number;
   totalSteps: number;
   timelineStage:
+    | 'derive_parity_count'
+    | 'label_positions'
+    | 'build_parity_matrix'
+    | 'build_generator_matrix'
     | 'read_message'
     | 'select_rows'
     | 'calc_columns'
@@ -48,6 +54,84 @@ export function generateEncodingSteps(
 
   if (k === 0 || n === 0) return steps;
 
+  const derivation = deriveHammingParams(k);
+  const r = n - k;
+  const totalSteps = 4 + 1 + k + n + 2;
+  let stepIdx = 0;
+  const parityMatrix = G.map((row) => row.slice(k));
+  const pushDerivationStep = (
+    timelineStage: CalculationStep['timelineStage'],
+    title: string,
+    subtitle: string,
+    mathFormula: string,
+    expandedTerms: string,
+    mod2Result: string,
+    explanation: string,
+  ) => steps.push({
+    type: 'encoding', stepIndex: stepIdx++, totalSteps, timelineStage,
+    computedCodewordBits: new Array(n).fill(null), computedSyndromeBits: [],
+    title, subtitle, mathFormula, expandedTerms, mod2Result, explanation,
+  });
+
+  // The screen first derives the selected Hamming layout, before using the message.
+  const parityChecks = derivation.parityTestRows
+    .map((test) => `r=${test.r}: 2^${test.r}=${test.power}; ${test.power} ≥ ${k}+${test.r}+1=${test.required} — ${test.satisfied ? 'YES ✓' : 'no ✗'}`)
+    .join('\n');
+  pushDerivationStep(
+    'derive_parity_count',
+    '1. HOW MANY PARITY BITS DO WE NEED?',
+    `m = ${k} data bits`,
+    '2^r ≥ m + r + 1',
+    parityChecks,
+    `r = ${r} parity bits; n = m + r = ${k} + ${r} = ${n}`,
+    `We need enough parity bits r so that the receiver can not only detect an error, but pin down which of the n = m+r bit positions is wrong — or confirm there is no error at all. The r syndrome bits must represent m+r+1 distinct outcomes: no error plus one for each position.`,
+  );
+
+  const positionSummary = derivation.positions
+    .map((position) => `${position.position}:${position.isParity ? `P${position.parityIndex}` : `D${position.messageIndex}`}`)
+    .join('   ');
+  pushDerivationStep(
+    'label_positions',
+    '2. IDENTIFY PARITY AND DATA POSITIONS',
+    `Label all positions 1 through ${n}`,
+    'P: 1, 2, 4, 8, ...  |  D: every other position',
+    positionSummary,
+    `Parity positions: ${derivation.parityPositions.join(', ')}   |   Data positions: ${derivation.messagePositions.join(', ')}`,
+    'Parity bits go at positions that are powers of two — 1, 2, 4, 8, ... — because those positions have exactly one bit set in binary, which lets each parity bit own a clean, non-overlapping check. Every other position holds a data bit, filled left to right. We are only labelling roles here: no parity value is calculated and no data has been placed yet.',
+  );
+
+  const inspectorLines = derivation.parityEquations
+    .map((equation) => {
+      const workers = equation.positions.slice(1).map((position) =>
+        `${position}=${position.toString(2).padStart(r, '0')}`,
+      );
+      return `P${equation.parityPosition} watches binary digit 2^${equation.parityIndex - 1}: ${workers.join(', ') || 'no data workers'}`;
+    })
+    .join('\n');
+  const pTable = parityMatrix.map((row, index) => `D${index + 1}: [${row.join(' ')}]`).join('\n');
+  pushDerivationStep(
+    'build_parity_matrix',
+    '3. WHICH DATA BITS CONTRIBUTE TO WHICH PARITY BITS?',
+    'Each parity bit is an inspector; each position is a worker',
+    `P matrix (${k} × ${r})`,
+    `${inspectorLines}\n\nP matrix from the active generator matrix:\n${pTable}`,
+    'A 1 means this inspector watches this data bit; a 0 means it does not.',
+    `Picture each parity bit as an inspector, and each position as a worker. Every inspector is assigned one binary digit to watch, and only checks in on workers whose position number has a 1 in that digit. We are not solving for any values here — just mapping which data bits are watched by which inspector. No real message is involved yet.`,
+  );
+
+  const generatorRows = G
+    .map((row, index) => `G_${index}: ${row.slice(0, k).join('')} (I) | ${row.slice(k).join('')} (P) = ${row.join('')}`)
+    .join('\n');
+  pushDerivationStep(
+    'build_generator_matrix',
+    '4. BUILD G = [I | P]',
+    `Join I (${k} × ${k}) and P (${k} × ${r}) row by row`,
+    `G = [I | P]  (${k} × ${n})`,
+    generatorRows,
+    `G has ${k} rows and ${n} columns.`,
+    `A matrix's dimensions mean its shape — rows × columns. I has one row and column per data bit, so every data bit passes straight through unchanged. P is the contribution table from the previous step. Glue each identity row to its P row: the result is G, a rulebook built before the real message is used.`,
+  );
+
   // Find active rows (where m_i == 1)
   const activeRowIndices: number[] = [];
   message.forEach((bit, idx) => {
@@ -70,9 +154,6 @@ export function generateEncodingSteps(
   // Steps (k+1)..(k+n): calculate each of n columns
   // Step (k+n+1): assemble codeword
   // Step (k+n+2): ready for channel
-  const totalSteps = 1 + k + n + 2;
-  let stepIdx = 0;
-
   // STEP 0: Read Message
   steps.push({
     type: 'encoding',
@@ -81,12 +162,12 @@ export function generateEncodingSteps(
     timelineStage: 'read_message',
     computedCodewordBits: new Array(n).fill(null),
     computedSyndromeBits: [],
-    title: '1. READ MESSAGE VECTOR',
+    title: '5. ENCODE THE REAL MESSAGE: c = m × G',
     subtitle: `m = [${message.join(' ')}]`,
     mathFormula: `c = m · G = ⨁_{i=0}^{${k - 1}} m_i · G_i  (mod 2)`,
     expandedTerms: message.map((b, i) => `${b}·G_${i}`).join(' ⊕ '),
     mod2Result: `Active rows to combine: ${activeRowIndices.length > 0 ? activeRowIndices.map(r => `G_${r}`).join(', ') : 'None (all zero)'}`,
-    explanation: `The ${k}-bit message vector m enters the encoder. Only rows of G where m_i = 1 contribute to the output codeword.`,
+    explanation: `Only now does your actual data ${message.join('')} enter the picture. For every data bit that is 1, XOR in that row of G; rows where the data bit is 0 are skipped — G itself never changed. XOR the contributing rows together (mod 2) to produce c.`,
   });
 
   // STEPS 1..k: Inspect each message bit and select rows
@@ -107,7 +188,7 @@ export function generateEncodingSteps(
       highlightRows: currentSelected,
       computedCodewordBits: new Array(n).fill(null),
       computedSyndromeBits: [],
-      title: `2. SELECT MATRIX ROWS (Bit m_${i})`,
+      title: `ENCODING — SELECT MATRIX ROW (Bit m_${i})`,
       subtitle: `Message bit m_${i} = ${bit}`,
       mathFormula: `m_${i} · G_${i} = ${bit} · [${G[i].join(' ')}]`,
       expandedTerms: bit === 1
@@ -115,8 +196,8 @@ export function generateEncodingSteps(
         : `0 × Row G_${i} = [${new Array(n).fill(0).join(' ')}] → IGNORED`,
       mod2Result: `Currently included: [${currentSelected.map(r => `G_${r}`).join(' ⊕ ') || '∅'}]`,
       explanation: bit === 1
-        ? `m_${i} = 1, so row G_${i} is highlighted and added to the GF(2) linear combination.`
-        : `m_${i} = 0, so row G_${i} is multiplied by 0 and ignored.`,
+        ? `m_${i} = 1, so row G_${i} contributes to the codeword. XOR this row with the other selected rows; addition is modulo 2, so equal bits cancel in pairs.`
+        : `m_${i} = 0, so row G_${i} is multiplied by 0 and skipped. G itself does not change; only the rows selected by the message contribute.`,
     });
   }
 
@@ -156,12 +237,12 @@ export function generateEncodingSteps(
       highlightCols: [col],
       computedCodewordBits: [...computedCodewordProgress],
       computedSyndromeBits: [],
-      title: `3. CALCULATE CODEWORD BIT c_${col}`,
+      title: `ENCODING — CALCULATE CODEWORD BIT c_${col}`,
       subtitle: `Column ${col} of G: c_${col} = m · Col_${col}(G)`,
       mathFormula: `c_${col} = ⨁_{i: m_i=1} G_{i,${col}}`,
       expandedTerms: `${termExpression} = ${binaryXorDisplay}`,
       mod2Result: `c_${col} = ${colResult}  (mod 2)`,
-      explanation: `Evaluating column ${col}: mod-2 addition of active cells yields c_${col} = ${colResult}. Bit ${col} added to packet.`,
+      explanation: `For codeword position ${col}, XOR the entries in column ${col} of every selected generator row. Modulo-2 addition gives c_${col} = ${colResult}; this bit is added to the packet.`,
     });
   }
 
@@ -174,12 +255,12 @@ export function generateEncodingSteps(
     highlightRows: activeRowIndices,
     computedCodewordBits: [...finalCodeword],
     computedSyndromeBits: [],
-    title: '4. CODEWORD ASSEMBLED',
+    title: 'CODEWORD ASSEMBLED',
     subtitle: `Systematic c = [m | p] = [${finalCodeword.join(' ')}]`,
     mathFormula: `c = m · G = [${finalCodeword.join(' ')}]`,
     expandedTerms: `Data bits m: [${finalCodeword.slice(0, k).join(' ')}] | Parity bits p: [${finalCodeword.slice(k).join(' ')}]`,
     mod2Result: `✓ All ${n} codeword bits generated successfully`,
-    explanation: `The codeword packet c is fully assembled. It contains the ${k} original message bits followed by ${n - k} parity check bits.`,
+    explanation: `The codeword packet c is fully assembled: the ${k} original message bits are followed by ${n - k} parity bits calculated from the selected rows of G.`,
   });
 
   // STEP (k+n+2): Launch into Channel
@@ -190,7 +271,7 @@ export function generateEncodingSteps(
     timelineStage: 'send_channel',
     computedCodewordBits: [...finalCodeword],
     computedSyndromeBits: [],
-    title: '5. TRANSMITTING THROUGH CHANNEL',
+    title: 'CODEWORD READY — TRANSMITTING THROUGH CHANNEL',
     subtitle: 'Packet in Channel Conduit',
     mathFormula: 'Codeword c enters Binary Symmetric Channel (BSC)',
     expandedTerms: `c = [${finalCodeword.join(' ')}]`,

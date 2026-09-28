@@ -18,7 +18,6 @@ import StageInstruction from './StageInstruction';
 import CalculationStepperBar from './CalculationStepperBar';
 import SessionLogPanel from './SessionLogPanel';
 import GameControllerHUD from './GameControllerHUD';
-import CalculationVisualizerDrawer from './CalculationVisualizerDrawer';
 import { useLabStore } from '../state/labStore';
 
 function ConnectionPath() {
@@ -62,7 +61,6 @@ function PathToHammingSpace() {
 export default function Lab3D() {
   const orbitRef = useRef();
   const [activeZone, setActiveZone] = useState('overview');
-  const [isVisualizerOpen, setIsVisualizerOpen] = useState(false);
 
   // Stepper auto-playback hook
   const calculationSteps = useLabStore((s) => s.calculationSteps);
@@ -106,12 +104,10 @@ export default function Lab3D() {
       {/* Contextual bottom Stage Instruction HUD */}
       <StageInstruction />
 
-      {/* Bottom navigation bar with Zone presets and "How Calculations Work" trigger */}
+      {/* Bottom navigation bar with Zone presets */}
       <ZoneNav
         activeZone={activeZone}
         onNavigate={handleNavigate}
-        onToggleVisualizer={() => setIsVisualizerOpen((v) => !v)}
-        isVisualizerOpen={isVisualizerOpen}
       />
 
       {/* Bottom-left corner: WASD Flight Controller and Session Log Inspector */}
@@ -130,12 +126,6 @@ export default function Lab3D() {
         <GameControllerHUD onResetCamera={() => handleNavigate('overview')} />
         <SessionLogPanel />
       </div>
-
-      {/* Full 2D Mathematical Matrix Calculation Drawer Modal */}
-      <CalculationVisualizerDrawer
-        isOpen={isVisualizerOpen}
-        onClose={() => setIsVisualizerOpen(false)}
-      />
 
       <Canvas
         shadows

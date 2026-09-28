@@ -22,6 +22,7 @@ export type SimulationStage =
 
 export type CameraFocusTarget =
   | 'overview'
+  | 'display'
   | 'firstPerson'
   | 'tx'
   | 'msgInput'
@@ -68,11 +69,19 @@ export interface SimulationState {
   animationSpeed: 'normal' | 'fast' | 'instant';
   showLiveHUD: boolean;
   showXorVisualizer: boolean;
+  autoOpenLesson: boolean;
+  lessonOpen: boolean;
+  lessonPhase: 'encoding' | 'decoding' | null;
+  lessonStep: number;
 
   // Actions
   setShowLiveHUD: (show: boolean) => void;
   setShowXorVisualizer: (show: boolean) => void;
   dismissLiveHUD: () => void;
+  setAutoOpenLesson: (enabled: boolean) => void;
+  setLessonStep: (step: number) => void;
+  finishLessonPhase: (phase: 'encoding' | 'decoding') => void;
+  skipLesson: () => void;
   setMode: (mode: 'normal' | 'explain') => void;
   setSpeedMultiplier: (mult: 0.5 | 1 | 2) => void;
   setNK: (n: number, k: number) => void;
@@ -147,6 +156,10 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   animationSpeed: 'normal',
   showLiveHUD: true,
   showXorVisualizer: true,
+  autoOpenLesson: true,
+  lessonOpen: false,
+  lessonPhase: null,
+  lessonStep: 1,
 
   setShowLiveHUD: (show: boolean) => set({ showLiveHUD: show }),
   setShowXorVisualizer: (show: boolean) => set({ showXorVisualizer: show }),
@@ -199,6 +212,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       currentStepIndex: 0,
       isAnimationPlaying: false,
       cameraFocus: 'overview',
+      lessonOpen: false,
+      lessonPhase: null,
+      lessonStep: 1,
     });
   },
 
@@ -265,6 +281,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       currentStepIndex: 0,
       isAnimationPlaying: false,
       cameraFocus: 'overview',
+      lessonOpen: false,
+      lessonPhase: null,
+      lessonStep: 1,
     });
   },
 
@@ -283,6 +302,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       calculationSteps: [],
       currentStepIndex: 0,
       isAnimationPlaying: false,
+      lessonOpen: false,
+      lessonPhase: null,
+      lessonStep: 1,
     });
   },
 
@@ -298,6 +320,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       calculationSteps: [],
       currentStepIndex: 0,
       isAnimationPlaying: false,
+      lessonOpen: false,
+      lessonPhase: null,
+      lessonStep: 1,
     });
   },
 
@@ -316,12 +341,13 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       isAnimationPlaying: true,
       stage: 'encoding',
       showLiveHUD: false,
+      cameraFocus: 'display',
     });
   },
 
   startExplainEncoding: () => {
     set({ mode: 'explain' });
-    get().startEncodingAnimation();
+    get().encode();
   },
 
   startDecodingAnimation: () => {
@@ -457,7 +483,33 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   },
 
   encode: () => {
-    // Starts encoding calculation steps with 3D XOR Visualizer
+    const { message, G, n, autoOpenLesson } = get();
+    if (autoOpenLesson) {
+      const codeword = gf2VecMatMul(message, G);
+      set({
+        codeword,
+        receivedVector: [...codeword],
+        errorVector: new Array(n).fill(0),
+        errorPositions: [],
+        syndrome: new Array(n - get().k).fill(0),
+        correctedVector: new Array(n).fill(0),
+        stage: 'encoding',
+        calculationSteps: [],
+        currentStepIndex: 0,
+        isAnimationPlaying: false,
+        lessonOpen: true,
+        lessonPhase: 'encoding',
+        lessonStep: 1,
+        cameraFocus: 'tx',
+      });
+      setTimeout(() => {
+        const current = get();
+        if (current.lessonOpen && current.lessonPhase === 'encoding') {
+          current.setCameraFocus('display');
+        }
+      }, 900);
+      return;
+    }
     get().startEncodingAnimation();
   },
 
@@ -514,6 +566,8 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
     get().toggleChannelBit(targetBit);
 
+    if (get().autoOpenLesson) return;
+
     // Briefly display the corrupted bit in overview angle, then continue linear code decode animation
     setTimeout(() => {
       get().decode();
@@ -525,8 +579,56 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   },
 
   decode: () => {
-    // Starts decoding syndrome calculation steps in overview angle
+    const { autoOpenLesson, receivedVector, H } = get();
+    if (autoOpenLesson) {
+      const result = decodeAndCorrect(receivedVector, H, get().syndromeTable);
+      set({
+        syndrome: result.syndrome,
+        stage: 'decoding',
+        calculationSteps: [],
+        currentStepIndex: 0,
+        isAnimationPlaying: false,
+        lessonOpen: true,
+        lessonPhase: 'decoding',
+        lessonStep: 6,
+        cameraFocus: 'channel',
+      });
+      return;
+    }
     get().startDecodingAnimation();
+  },
+
+  setAutoOpenLesson: (enabled: boolean) => set({ autoOpenLesson: enabled }),
+
+  setLessonStep: (step: number) => {
+    if (get().lessonOpen && step >= 1 && step <= 9) set({ lessonStep: step });
+  },
+
+  finishLessonPhase: (phase: 'encoding' | 'decoding') => {
+    if (phase === 'encoding') {
+      set({ lessonOpen: false, lessonPhase: null, lessonStep: 1, stage: 'inChannel', cameraFocus: 'channel' });
+      return;
+    }
+
+    const { receivedVector, H, syndromeTable, n } = get();
+    const result = decodeAndCorrect(receivedVector, H, syndromeTable);
+    set({
+      syndrome: result.syndrome,
+      correctedVector: result.correctedVector,
+      lastCorrectedBit: result.errorPosition >= 0 ? result.errorPosition : null,
+      stage: 'corrected',
+      lessonOpen: false,
+      lessonPhase: null,
+      lessonStep: 1,
+      errorPositions: result.errorPosition >= 0 ? [result.errorPosition] : [],
+      errorVector: new Array(n).fill(0),
+      cameraFocus: 'rx',
+    });
+  },
+
+  skipLesson: () => {
+    const phase = get().lessonPhase;
+    if (phase) get().finishLessonPhase(phase);
   },
 
   correct: () => {
@@ -556,6 +658,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       isAnimationPlaying: false,
       showLiveHUD: false,
       cameraFocus: 'overview',
+      lessonOpen: false,
+      lessonPhase: null,
+      lessonStep: 1,
     });
   },
 

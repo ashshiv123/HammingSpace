@@ -142,6 +142,10 @@ const CameraManager: React.FC = () => {
         yaw.current = 0;
         pitch.current = -0.05;
         break;
+      case 'display':
+        targetCamPos.current.set(0, 5.1, 2.8);
+        targetLookAt.current.set(0, 3.8, -6.5);
+        break;
       case 'msgInput':
         targetCamPos.current.set(-6.2, 0.4, 5.8);
         targetLookAt.current.set(-6.2, -1.2, 1.6);

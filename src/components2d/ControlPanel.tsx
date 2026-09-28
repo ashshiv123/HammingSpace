@@ -20,12 +20,10 @@ import { useSimulationStore } from '../store/simulationStore';
 
 export interface ControlPanelProps {
   onOpenCalculationVisualizer?: () => void;
-  onOpenVisualizerDrawer?: () => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
   onOpenCalculationVisualizer,
-  onOpenVisualizerDrawer,
 }) => {
   const {
     n,
@@ -55,6 +53,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     nextStep,
     skipAnimation,
     replayAnimation,
+    autoOpenLesson,
+    setAutoOpenLesson,
+    lessonOpen,
   } = useSimulationStore();
 
   const [isMinimized, setIsMinimized] = useState(false);
@@ -334,8 +335,20 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                   maxLength={Math.ceil(k / 8) + 1}
                 />
               </div>
+
             )}
           </div>
+
+          <label className="flex items-center justify-between gap-3 border-t border-slate-800 pt-2 text-[10px] text-slate-400 cursor-pointer">
+            <span>Auto-open lesson steps</span>
+            <input
+              type="checkbox"
+              checked={autoOpenLesson}
+              onChange={(event) => setAutoOpenLesson(event.target.checked)}
+              disabled={lessonOpen}
+              className="accent-teal-400"
+            />
+          </label>
         </div>
 
         {/* Dynamic Contextual Action Area Based on Stage */}
@@ -356,7 +369,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 type="button"
                 onClick={() => {
                   startExplainEncoding();
-                  onOpenVisualizerDrawer?.();
                 }}
                 className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-mono font-medium uppercase transition bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer"
               >
@@ -499,7 +511,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           )}
 
           {/* STAGE 5: RUNNING / CALCULATION IN PROGRESS */}
-          {(stage === 'encoding' || stage === 'decoding') && (
+          {(stage === 'encoding' || stage === 'decoding') && !lessonOpen && (
             <div className="p-3 rounded-xl bg-slate-950/80 border border-blue-500/40 space-y-2">
               <div className="flex items-center justify-between text-xs font-mono font-semibold">
                 <span className="flex items-center gap-1.5 text-blue-400">
@@ -603,19 +615,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
         </div>
 
-        {/* Visualizer Trigger & Reset */}
+        {/* Simulation Reset */}
         <div className="border-t border-slate-800 pt-2 space-y-1.5">
-          {onOpenVisualizerDrawer && (
-            <button
-              type="button"
-              onClick={onOpenVisualizerDrawer}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/60 text-amber-300 rounded-lg text-[11px] font-mono font-semibold transition cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>How Calculations Work</span>
-            </button>
-          )}
-
           <button
             type="button"
             onClick={reset}

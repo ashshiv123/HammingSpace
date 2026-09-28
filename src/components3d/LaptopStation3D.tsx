@@ -6,7 +6,7 @@ export interface LaptopStation3DProps {
   position?: [number, number, number];
   stationType: 'tx' | 'rx';
   title: string;
-  subtitle: string;
+  subtitle?: string;
   statusBadge?: string;
   badgeTone?: 'blue' | 'green' | 'red' | 'amber';
   children?: React.ReactNode;
@@ -18,15 +18,12 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
   position = [0, 0, 0],
   stationType,
   title,
-  subtitle,
   statusBadge,
   badgeTone = 'blue',
   children,
   keyboardContent,
   deskColor = '#1e2536',
 }) => {
-  const isTX = stationType === 'tx';
-
   const badgeColor =
     badgeTone === 'green'
       ? '#10b981'
@@ -46,8 +43,8 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
         <boxGeometry args={[5.2, 0.10, 3.4]} />
         <meshStandardMaterial
           color={deskColor}
-          roughness={0.4}
-          metalness={0.2}
+          roughness={0.65}
+          metalness={0.12}
         />
       </mesh>
 
@@ -93,8 +90,8 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
           <boxGeometry args={[3.8, 0.07, 2.5]} />
           <meshStandardMaterial
             color="#334155"
-            metalness={0.8}
-            roughness={0.3}
+            metalness={0.55}
+            roughness={0.45}
           />
         </mesh>
 
@@ -156,7 +153,7 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
           <meshStandardMaterial
             color={badgeColor}
             emissive={badgeColor}
-            emissiveIntensity={1.2}
+            emissiveIntensity={0.35}
           />
         </mesh>
 
@@ -182,8 +179,8 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
               <boxGeometry args={[3.8, 2.5, 0.06]} />
               <meshStandardMaterial
                 color="#334155"
-                metalness={0.8}
-                roughness={0.3}
+                metalness={0.55}
+                roughness={0.45}
               />
             </mesh>
 
@@ -209,8 +206,8 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
               <meshStandardMaterial
                 color="#0b101d"
                 emissive="#080e1a"
-                emissiveIntensity={0.25}
-                roughness={0.2}
+                emissiveIntensity={0.08}
+                roughness={0.35}
               />
             </mesh>
 
@@ -227,11 +224,11 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
               {/* Station Title */}
               <Text
                 position={[-1.6, 0, 0.01]}
-                fontSize={0.10}
+                fontSize={0.13}
                 color="#f8fafc"
                 anchorX="left"
                 anchorY="middle"
-                letterSpacing={0.06}
+                letterSpacing={0.04}
               >
                 {title}
               </Text>
@@ -248,7 +245,7 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
                   </mesh>
                   <Text
                     position={[0, 0, 0.01]}
-                    fontSize={0.075}
+                    fontSize={0.085}
                     color={badgeColor}
                     anchorX="center"
                     anchorY="middle"
@@ -260,20 +257,8 @@ export const LaptopStation3D: React.FC<LaptopStation3DProps> = ({
               )}
             </group>
 
-            {/* Screen Subtitle / Status Diagnosis */}
-            <Text
-              position={[0, 0.74, 0.02]}
-              fontSize={0.08}
-              color="#94a3b8"
-              anchorX="center"
-              anchorY="middle"
-              letterSpacing={0.02}
-            >
-              {subtitle}
-            </Text>
-
-            {/* Screen Display Content (Matrices, Equations, Diagnoses) */}
-            <group position={[0, -0.15, 0.03]} scale={0.78}>
+            {/* Keep the screen focused on the live station vectors. */}
+            <group position={[0, -0.15, 0.03]} scale={0.9}>
               {children}
             </group>
           </group>
