@@ -610,10 +610,10 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       return;
     }
 
-    const { receivedVector, H, syndromeTable, n } = get();
+    const { receivedVector, H, syndromeTable, n, k } = get();
     const result = decodeAndCorrect(receivedVector, H, syndromeTable);
     set({
-      syndrome: result.syndrome,
+      syndrome: new Array(n - k).fill(0),
       correctedVector: result.correctedVector,
       lastCorrectedBit: result.errorPosition >= 0 ? result.errorPosition : null,
       stage: 'corrected',

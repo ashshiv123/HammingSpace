@@ -169,8 +169,8 @@ Every bit representation — 3D tray sphere, laptop screen tile, overlay matrix 
 - **Cove Light**: Spot `[0, 7.5, -4.5]` → target `[0, 2, -6.5]`, color `#fed7aa`, intensity `3.2`, angle `PI/2.6`, penumbra `0.8`
 - **Station Accents**: Point lights at `[-6.2, 4.5, 1.2]` and `[6.2, 4.5, 1.2]`, intensity `1.1`
 - **Ambient**: `#cbd5e1` intensity `0.4`
-- **Renderer**: ACESFilmicToneMapping, sRGBEncoding, exposure `1.0`, DPR `[1, 2]`
-
+- **Ambient**: `#cbd5e1` intensity `0.4`
+- **Renderer**: ACESFilmicToneMapping, `gl={{ antialias: true, outputColorSpace: THREE.SRGBColorSpace }}`, exposure `1.0`, DPR `[1, 2]`
 ### Room
 - Floor: Plane 50×36, `--mat-floor`, roughness 0.45, metalness 0.25, receives shadow
 - Rug: Plane 22×9 at y=-2.115, `--mat-rug`, roughness 0.85
@@ -207,30 +207,38 @@ Every bit representation — 3D tray sphere, laptop screen tile, overlay matrix 
 - **Status text**: Small unobtrusive label (replaces old harsh bar)
 
 ### Receiver
+### Receiver
 - Same laptop component
 - Screen shows: RECEIVED row, SYNDROME, CORRECTED row (when corrected), recovered message
 
+### Floating Hologram Panels
+- **TX Panel**: Floating G matrix above the transmitter laptop. $I_k$ portion tinted `--color-data`, $P$ portion tinted `--color-parity`. Active row/col highlighted per stage. Readable from overview.
+- **RX Panel**: Floating H matrix above the receiver laptop. ParityVenn SVG panel (three overlapping circles, 7 regions) mapped to codeword bits. On error, failing circles turn red and overlap highlighted with syndrome bits.
 ---
 
 ## 7. OVERLAY & HUD RESTYLE
 
 ### Lesson Overlay
+### Lesson Overlay (Side Coach Card)
+- **Positioning**: Non-blocking side coach card on the left/right, replacing the blurred modal. The 3D scene stays visible.
+- **Animation**: Keep FLIP animation from laptop screen rect to the side card.
+- **Typography**: Plain-language first (one simple sentence per stage). "Show math" toggle reveals KaTeX formulas and jargon. Min 12px labels. Raise muted text contrast to AA.
+- **Elements**: ✕/✓ glyphs for error/corrected status.
+- **Capacity Meter**: "Flips: 1/1 fixable" meter that turns red past capacity, with a "Try 2 flips" button demonstrating miscorrection.
+- **Linearity Demo**: Built-in demonstration of code linearity.
 - Panel: Slate `#111a2e`, border `#22304a`, radius 10px, shadow `0 20px 80px rgba(0,0,0,0.6)`
-- Scrim: `rgba(4,8,17,0.84)` + `backdrop-filter: blur(5px)`
-- Typography: Georgia/Times serif for body (≥15px), mono for math/bitstrings
-- Badges: Encoding = teal `#5fd4c4`, Decoding = amber `#e8a33d` (matching hammingLesson.css)
+- Badges: Encoding = teal `#5fd4c4`, Decoding = amber `#e8a33d`
 - Buttons: Primary teal `#5fd4c4`, Secondary transparent + border
 - Progress bar: Teal fill
 - Focus trap + keyboard nav (Enter/Right=Next, Left=Prev, Esc=Skip)
 - Hit targets ≥40px, AA contrast
-
+### Control Panel
 ### Control Panel
 - Calm slate `#0f172a`/`#1e293b`, thin borders `#334155`
-- Teal accent for primary actions, amber for parity-related
-- Bit chips: Data=teal bg, Parity=amber bg, Error=red ring, Corrected=green ring
-- Minimized state preserved
+- Unify data color to one teal/blue. Status chips are neutral.
+- Bit chips: Data=teal bg, Parity=amber bg, Error=red ring, Corrected=green ring. Add ✕/✓ glyphs.
+- **Overview Framing**: Collapse panel by default in overview so RX is not covered. Detail text only shows in close shots.
 - Responsive: max-w-[calc(100vw-2rem)], readable at 1366×768
-
 ### Stage Instruction / Game Controller / Session Log / Camera Controls
 - Same slate palette, consistent radius, spacing, typography
 - No emoji, no gradient text, no sparkle icons (replace with clean icons)
