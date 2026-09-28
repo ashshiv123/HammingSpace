@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  Radio,
   Camera,
-  CheckCircle2,
-  AlertTriangle,
-  Zap,
   Calculator,
 } from 'lucide-react';
 import { useSimulationStore } from './store/simulationStore';
 import { LabScene } from './scenes/LabScene';
 import { ControlPanel } from './components2d/ControlPanel';
-import { SessionLogPanel } from './scenes/SessionLogPanel';
 import { StageInstruction } from './components2d/StageInstruction';
 import { useCalculationPlayback } from './hooks/useCalculationPlayback';
 import { CalculationPage } from './pages/CalculationPage';
@@ -26,7 +21,7 @@ import { SceneErrorBoundary } from './components2d/SceneErrorBoundary';
 
 export default function App() {
   const {
-    stage, cameraFocus, setCameraFocus, message, G, H, codeword, errorVector,
+    cameraFocus, setCameraFocus, message, G, H, codeword, errorVector,
     lessonOpen, lessonPhase, lessonStep, setLessonStep, finishLessonPhase,
     skipLesson, reset,
   } = useSimulationStore();
@@ -60,68 +55,6 @@ export default function App() {
     if (window.location.pathname !== targetPath) {
       window.history.pushState({}, '', targetPath);
     }
-  };
-
-  const getStatusBadge = () => {
-    return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={stage}
-          initial={{ opacity: 0, y: -6, scale: 0.92, filter: 'blur(3px)' }}
-          animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, y: 6, scale: 0.92, filter: 'blur(3px)' }}
-          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="flex-shrink-0"
-        >
-          {(() => {
-            switch (stage) {
-              case 'idle':
-                return (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-400 text-[11px] font-mono shadow-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                    <span>IDLE</span>
-                  </div>
-                );
-              case 'encoding':
-                return (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-950/70 border border-blue-500/50 text-blue-300 text-[11px] font-mono shadow-md shadow-blue-900/20">
-                    <Zap className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
-                    <span className="font-semibold tracking-wide">ENCODING</span>
-                  </div>
-                );
-              case 'inChannel':
-                return (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-950/70 border border-blue-500/50 text-blue-300 text-[11px] font-mono shadow-md shadow-blue-900/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
-                    <span className="font-semibold tracking-wide">IN CHANNEL</span>
-                  </div>
-                );
-              case 'decoding':
-                return (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-950/70 border border-indigo-500/50 text-indigo-300 text-[11px] font-mono shadow-md shadow-indigo-900/20">
-                    <Radio className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
-                    <span className="font-semibold tracking-wide">DECODING</span>
-                  </div>
-                );
-              case 'errorDetected':
-                return (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/70 border border-rose-500/60 text-rose-200 text-[11px] font-mono shadow-md shadow-rose-900/30">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                    <span className="font-semibold tracking-wide">ERROR DETECTED</span>
-                  </div>
-                );
-              case 'corrected':
-                return (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/60 text-emerald-200 text-[11px] font-mono shadow-md shadow-emerald-900/30">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="font-semibold tracking-wide">CORRECTED</span>
-                  </div>
-                );
-            }
-          })()}
-        </motion.div>
-      </AnimatePresence>
-    );
   };
 
   // Dedicated 2D Calculation Workspace View
@@ -175,27 +108,7 @@ export default function App() {
         {/* ======================================================================= */}
         {/* ROW 1: HEADER CONTAINER (z-40)                                          */}
         {/* ======================================================================= */}
-        <header className="row-start-1 w-full flex items-center justify-between gap-2.5 sm:gap-4 pointer-events-auto z-40 pb-2">
-          {/* Brand Identity */}
-          <div className="flex items-center gap-2.5 px-3.5 py-2 bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-xl shadow-lg flex-shrink-0">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400">
-              <Radio className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xs font-mono font-bold tracking-wider text-slate-100 uppercase">
-                  Digital Communication Lab
-                </h1>
-                <span className="hidden md:inline-block px-1.5 py-0.5 text-[9px] font-mono uppercase bg-slate-800 border border-slate-700 text-slate-300 rounded">
-                  STUDIO SIMULATOR
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-400 font-mono hidden sm:block">
-                Linear Block Code & Coset Syndrome Analyzer
-              </p>
-            </div>
-          </div>
-
+        <header className="row-start-1 w-full flex items-center justify-center gap-2.5 sm:gap-4 pointer-events-auto z-40 pb-2">
           {/* Center: Direct Mode Navigation Pill */}
           <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 backdrop-blur-xl border border-slate-700/60 rounded-xl shadow-lg flex-shrink-0">
             <button
@@ -216,10 +129,6 @@ export default function App() {
             </button>
           </div>
 
-          {/* Top-Right: Unified Simulation Status Badge */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {getStatusBadge()}
-          </div>
         </header>
 
         {/* ======================================================================= */}
@@ -269,14 +178,11 @@ export default function App() {
           </motion.section>
 
           {/* ===================================================================== */}
-          {/* UNIQUE CONTAINER 4: WASD GAME CONTROLLER & SESSION LOG (z-35)         */}
+          {/* UNIQUE CONTAINER 4: WASD GAME CONTROLLER (z-35)                      */}
           {/* Anchored bottom-left corner with dedicated space                      */}
           {/* ===================================================================== */}
           <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 flex flex-col gap-1.5 pointer-events-auto z-35 transition-all duration-200">
             <GameControllerHUD />
-            <aside id="session-log-container">
-              <SessionLogPanel />
-            </aside>
           </div>
 
           {/* ===================================================================== */}
