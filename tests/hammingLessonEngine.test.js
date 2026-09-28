@@ -26,6 +26,16 @@ describe('hamming lesson engine', () => {
     expect(state.corrected).toEqual(state.c);
   });
 
+  it('renders clean and beyond-capacity channel outcomes without fabricated positions', () => {
+    const clean = createLessonState({ messageBits: [1, 0, 0, 1], G: G74, H: H74 });
+    expect(clean.S).toEqual([0, 0, 0]);
+    expect(renderLessonStep(clean, 9).content.result).toContain('no error detected');
+
+    const multiple = createLessonState({ messageBits: [1, 0, 0, 1], G: G74, H: H74, errorVector: [1, 1, 0, 1, 0, 0, 0] });
+    expect(multiple.e.reduce((sum, bit) => sum + bit, 0)).toBe(3);
+    expect(renderLessonStep(multiple, 9).content.result).toContain('may be a miscorrection');
+  });
+
   it('(15,11) requires four parity bits and nine steps render', () => {
     const structural = buildPStructural(15, 4);
     const state = createLessonState({ messageBits: new Array(11).fill(0), G: buildG(structural.P), H: buildH(structural.P) });

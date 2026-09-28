@@ -148,7 +148,13 @@ function renderStep8(state) {
 
 function renderStep9(state) {
   const syndromeText = state.S.join('');
-  const outcome = state.S.every((bit) => bit === 0) ? `Syndrome S = ${syndromeText} — all zero.\nThe receiver concludes: no error detected.` : `Syndrome S = ${syndromeText} matches column ${state.errorPosition + 1} of H -> error located at position ${state.errorPosition + 1}.\nFlipping that bit: corrected = ${state.corrected.join('')}\nRecovered data bits = ${state.corrected.slice(0, state.k).join('')}`;
+  const outcome = state.S.every((bit) => bit === 0)
+    ? `Syndrome S = ${syndromeText} — all zero.\nThe receiver concludes: no error detected.`
+    : weight(state.e) > state.t && state.errorPosition >= 0
+    ? `Syndrome S = ${syndromeText} matches column ${state.errorPosition + 1} of H, but ${weight(state.e)} errors were injected.\nThe decoder's candidate correction is ${state.corrected.join('')}; this exceeds the guaranteed correction capacity of ${state.t} and may be a miscorrection.`
+    : state.errorPosition >= 0
+    ? `Syndrome S = ${syndromeText} matches column ${state.errorPosition + 1} of H -> error located at position ${state.errorPosition + 1}.\nFlipping that bit: corrected = ${state.corrected.join('')}\nRecovered data bits = ${state.corrected.slice(0, state.k).join('')}`
+    : `Syndrome S = ${syndromeText} has no single-bit column match.\nThe injected pattern exceeds the guaranteed correction capacity; no correction is applied.`;
   return { paragraphs: ['All the receiver has is r. To check for trouble, it multiplies r by H^T to get a short syndrome — a fingerprint of whatever went wrong (or did not). Then it compares that fingerprint against each column of H.'], blocks: [`r = 1x${state.n}\nH^T = ${state.n}x${state.r}\nr x H^T = 1x${state.r}\n\nS = ${syndromeText}`], result: outcome, hint: 'The errors came from the noise injected in the 3D channel; restart the lab to try a different pattern.' };
 }
 

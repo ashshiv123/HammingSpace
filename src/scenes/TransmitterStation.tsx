@@ -137,8 +137,8 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
             ? `Multiplying: c = m·G • Col c${currentStep?.activeCol ?? '...'}/${n}`
             : `Input ${k}-bit Message • Systematic Generator G [${k}×${n}]`
         }
-        statusBadge={stage === 'encoding' ? 'ENCODING' : 'READY'}
-        badgeTone={stage === 'encoding' ? 'blue' : 'blue'}
+          statusBadge={stage === 'encoding' ? 'ENCODING' : stage !== 'idle' ? 'SENT' : 'READY'}
+          badgeTone={stage === 'encoding' ? 'blue' : stage !== 'idle' ? 'green' : 'blue'}
         keyboardContent={
           <group position={[0, 0.02, 0.05]}>
             {/* Interactive Message Keys on Laptop Deck */}
@@ -163,7 +163,7 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
             })}
 
             {/* Quick Encode Return Key on Laptop Right Deck */}
-            <a.group
+            {stage === 'idle' && <a.group
               position={[1.35, 0, 0]}
               scale={encodeBtnScale}
               onClick={(e) => {
@@ -194,14 +194,22 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
                 anchorY="middle"
                 letterSpacing={0.04}
               >
-                {stage === 'idle' ? 'SEND' : 'BUSY'}
+                SEND
               </Text>
             </a.group>
+            }
           </group>
         }
       >
         {/* Laptop screen shows the live outgoing message selected on the keyboard. */}
         <group position={[0, -0.05, 0]}>
+          {(() => {
+            const sent = stage !== 'idle' && stage !== 'encoding';
+            const visibleVector = sent ? codeword : message;
+            const label = sent ? 'CODEWORD c' : 'OUTGOING MESSAGE m';
+            const spacing = Math.min(0.27, 3.0 / visibleVector.length);
+            return (
+              <>
           <Text
             position={[0, 0.48, 0.02]}
             fontSize={0.12}
@@ -210,18 +218,17 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
             anchorY="middle"
             letterSpacing={0.06}
           >
-            OUTGOING MESSAGE m
+            {label}
           </Text>
-          {message.map((bit, idx) => {
-            const spacing = Math.min(0.27, 3.0 / k);
-            const x = ((k - 1) * -spacing) / 2 + idx * spacing;
+          {visibleVector.map((bit, idx) => {
+            const x = ((visibleVector.length - 1) * -spacing) / 2 + idx * spacing;
             return (
               <group key={`screen-message-bit-${idx}`} position={[x, 0.04, 0.02]}>
                 <mesh>
                   <planeGeometry args={[spacing * 0.82, 0.32]} />
                   <meshStandardMaterial
-                    color={bit ? '#164e63' : '#111827'}
-                    emissive={bit ? '#0891b2' : '#000000'}
+                    color={bit ? (sent && idx >= k ? '#78350f' : '#164e63') : '#111827'}
+                      emissive={bit ? (sent && idx >= k ? '#d97706' : '#0891b2') : '#000000'}
                     emissiveIntensity={bit ? 0.4 : 0}
                     roughness={0.35}
                   />
@@ -242,7 +249,7 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
                   anchorX="center"
                   anchorY="middle"
                 >
-                  {`m${idx}`}
+                  {sent ? `c${idx}` : `m${idx}`}
                 </Text>
               </group>
             );
@@ -254,8 +261,11 @@ export const TransmitterStation: React.FC<TransmitterStationProps> = ({
             anchorX="center"
             anchorY="middle"
           >
-            {stage === 'encoding' ? 'MESSAGE SENT — ENCODING STARTED' : 'TOGGLE MESSAGE BITS, THEN SEND'}
+            {sent ? 'TRANSMITTED • DATA TEAL / PARITY AMBER' : stage === 'encoding' ? 'ENCODING IN PROGRESS' : 'TOGGLE MESSAGE BITS, THEN SEND'}
           </Text>
+              </>
+            );
+          })()}
         </group>
       </LaptopStation3D>
     </group>
