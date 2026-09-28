@@ -615,9 +615,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     const hasError = result.syndrome.some((b) => b === 1);
     
     set({
-      syndrome: hasError ? result.syndrome : new Array(n - k).fill(0),
-      stage: hasError ? 'errorDetected' : 'corrected',
-      correctedVector: hasError ? [] : [...receivedVector],
+      syndrome: new Array(n - k).fill(0),
+      stage: 'corrected',
+      correctedVector: [...result.correctedVector],
       lastCorrectedBit: hasError && result.errorPosition >= 0 ? result.errorPosition : null,
       lessonOpen: false,
       lessonPhase: null,
