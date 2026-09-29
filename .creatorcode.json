@@ -3,5 +3,10 @@
   "name": "HammingSpace",
   "framework": "React",
   "database": "None",
-  "createdAt": 1790489230484
+  "createdAt": 1790489230484,
+  "publishedTitle": "HammingSpace",
+  "publishedDescription": "HammingSpace is an interactive 3D learning tool that helps users understand Hamming codes, parity checks, and error correction through visual simulations and guided lessons.\n\nIt turns abstract coding theory into an intuitive lab where users can encode messages, introduce bit errors, and see how syndrome decoding detects and corrects them in real time.",
+  "publishedVersion": "v2",
+  "publishedTags": "hamming, education, coding, visualization",
+  "cloudProjectId": "5IC7spYhbOtOc1M64DKz"
 }
