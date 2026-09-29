@@ -20,14 +20,14 @@ Refer to the scripts definition inside standard build manifests (package.json, p
 - **Description**: HammingSpace is an interactive 3D learning tool that helps users understand Hamming codes, parity checks, and error correction through visual simulations and guided lessons.
 
 It turns abstract coding theory into an intuitive lab where users can encode messages, introduce bit errors, and see how syndrome decoding detects and corrects them in real time.
-- **Version**: v1
+- **Version**: v2
 - **Tags**: hamming, education, coding, visualization
 
 ## Git Repository Metadata (Tracked)
 - **Repository URL**: https://github.com/ashshiv123/HammingSpace.git
 - **Current Branch**: visual-upgrade
-- **Last Commit Hash**: 4ad890cd862a19042f702e8433e46822930f6e4a
-- **Last Checked**: 9/29/2026, 12:08:51 AM
+- **Last Commit Hash**: ff7d3ed792df0d4bac5c0439154b7cc4153a3e7d
+- **Last Checked**: 9/29/2026, 11:08:46 AM
 
 ## AI Prompt Ingest History (Tracked)
 | Date & Time | AI Agent / Tool | Prompt | Status |
